@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrismWAM: Decoupling State Representations in World Action Models</title>
+  <meta name="description" content="PrismWAM decouples semantic context (RGB) from physical state (depth) in World Action Models: Semantic Planning → Physical Rollout → Executable Action. Best among methods without embodied action pretraining on three of the five simulation benchmarks; first overall on RoboTwin C2R and second on RoboDojo (w/o Agent track).">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PrismWAM: Decoupling State Representations in World Action Models">
+  <meta property="og:description" content="Plan in RGB, roll out physics in depth, act from the rollout. Best among methods without embodied action pretraining on three of the five simulation benchmarks; first overall on RoboTwin C2R and second on RoboDojo (w/o Agent track).">
+  <meta property="og:image" content="static/video/hero_end.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#090b12">
+  <!-- Served behind a path-prefix proxy: ".../7860" must become ".../7860/" or relative asset paths break.
+       Then mark JS as running (.reveal blocks start hidden only under .js), with a failsafe that shows them
+       if core.js never wires its observer (it clears __prismRevealFS when it does). -->
+  <script>(function () {
+    var p = location.pathname, d = document.documentElement;
+    if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(p)) { location.replace(p + "/" + location.search + location.hash); return; }
+    d.classList.add("js");
+    document.addEventListener("DOMContentLoaded", function () {
+      window.__prismRevealFS = setTimeout(function () { d.classList.add("reveal-off"); }, 1500);
+    });
+  })();</script>
+  <link rel="icon" type="image/png" sizes="64x64" href="static/img/favicon-64.png?v=55018ecd">
+  <link rel="apple-touch-icon" href="static/img/apple-touch-icon.png?v=c0b401f5">
+  <!-- fonts are self-hosted (@font-face in base.css); preload the one every visitor needs -->
+  <link rel="preload" href="static/fonts/google-sans-flex-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="static/css/base.css?v=3e7bc03f">
+  <link rel="stylesheet" href="static/css/nav-hero.css?v=234cd0aa">
+  <link rel="stylesheet" href="static/css/lab.css?v=f3aefb95">
+  <link rel="stylesheet" href="static/css/method.css?v=36a8a660">
+  <link rel="stylesheet" href="static/css/results.css?v=c612f4f4">
+  <link rel="stylesheet" href="static/css/robust.css?v=221e2891">
+  <link rel="stylesheet" href="static/css/real.css?v=46c7778e">
+</head>
+<body>
+
+<!-- ═════════ Nav (owner: A) ═════════ -->
+<a class="nav-skip" href="#overview">Skip to content</a>
+<header class="nav" id="nav" data-state="hero" data-tone="light">
+  <nav class="nav-pill" aria-label="Sections">
+    <a class="nav-brand" href="#top" aria-label="PrismWAM, back to top">
+      <img class="nav-logo" src="static/img/logo-96.png?v=b854b73d" width="34" height="34" alt="" decoding="async">
+      <span class="nav-brand-w">PrismWAM</span>
+    </a>
+
+    <div class="nav-tabs" id="nav-tabs">
+      <span class="nav-ghost" aria-hidden="true"></span>
+      <span class="nav-ind" aria-hidden="true"></span>
+      <ul class="nav-list">
+        <li><a class="nav-tab" href="#overview">Overview</a></li>
+        <li><a class="nav-tab" href="#decoupling">Decoupling</a></li>
+        <li><a class="nav-tab" href="#method">Method</a></li>
+        <li><a class="nav-tab" href="#results">Results</a></li>
+        <li><a class="nav-tab" href="#robust">Robustness</a></li>
+        <li><a class="nav-tab" href="#real">Real world</a></li>
+        <li><a class="nav-tab" href="#citation">Citation</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-acts">
+      <a class="nav-act nav-paper" href="static/paper/PrismWAM.pdf" target="_blank" rel="noopener" title="Read the paper (PDF)">
+        <span>Paper</span>
+      </a>
+      <span class="nav-act nav-soon" aria-disabled="true" title="Code coming soon">
+        <span>Code</span><small>soon</small>
+      </span>
+      <a class="nav-act nav-film" href="static/video/prismwam_intro_1080p.mp4?v=d734dcaa" data-film="0" aria-haspopup="dialog" aria-label="Play the film" title="Watch the 2-minute film">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a.9.9 0 0 0 1.37.77l10.2-6.4a.9.9 0 0 0 0-1.54L9.37 4.83A.9.9 0 0 0 8 5.6z" fill="currentColor"/></svg>
+        <span>Film</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+
+<main id="main">
+<!-- ═════════ Hero (owner: A) — the whole film frame, fitted inside the first screen ═════════ -->
+<section class="hero" id="top" aria-label="Introduction">
+  <h1 class="vh" id="hero-title">PrismWAM: Decoupling State Representations in World Action Models</h1>
+
+  <div class="hero-frame">
+    <!-- no autoplay and preload="none": nav-hero.js switches to preload="auto" and plays (muted) only when motion is
+         allowed, so reduced-motion visitors (who get the hero_end.jpg still) never download the clip unless they ask -->
+    <video class="hero-video" id="hero-video" muted playsinline preload="none" disablepictureinpicture
+           poster="static/video/hero_start.jpg?v=b83adede" aria-hidden="true">
+      <!-- the whole 16:9 frame, music only; desktop: 2560x1440 (60 fps, ~5.5 Mb/s, so it never stalls on a slow link); phones: 1920x1080 -->
+      <source src="static/video/hero_1440.mp4?v=0a015d60" type="video/mp4" media="(min-width: 901px)">
+      <source src="static/video/hero_1080.mp4?v=45e73193" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="hero-ctrl" id="hero-ctrl">
+    <button class="hero-btn hero-sound" id="hero-sound" type="button" aria-pressed="false" aria-label="Turn sound on">
+      <svg class="hero-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="hero-ring-bg" cx="22" cy="22" r="20"/></svg>
+      <svg class="hero-ic hero-ic-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 5.5 6.6 8.8H4.2a.7.7 0 0 0-.7.7v5a.7.7 0 0 0 .7.7h2.4l3.9 3.3z" fill="currentColor"/><path d="m15.6 9.6 4.8 4.8M20.4 9.6l-4.8 4.8"/></svg>
+      <svg class="hero-ic hero-ic-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 5.5 6.6 8.8H4.2a.7.7 0 0 0-.7.7v5a.7.7 0 0 0 .7.7h2.4l3.9 3.3z" fill="currentColor"/><path d="M14.6 9.2a4 4 0 0 1 0 5.6M17.4 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>
+    </button>
+    <button class="hero-btn hero-replay" id="hero-replay" type="button" data-state="playing" aria-label="Pause the opening animation">
+      <svg class="hero-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="hero-ring-bg" cx="22" cy="22" r="20"/><circle class="hero-ring-fg" cx="22" cy="22" r="20"/></svg>
+      <svg class="hero-ic hero-ic-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor"/><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor"/></svg>
+      <svg class="hero-ic hero-ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.8v12.4a.9.9 0 0 0 1.37.77l9.9-6.2a.9.9 0 0 0 0-1.54l-9.9-6.2a.9.9 0 0 0-1.37.77z" fill="currentColor"/></svg>
+      <svg class="hero-ic hero-ic-replay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.2v4.6h4.6"/></svg>
+    </button>
+  </div>
+
+  <a class="hero-cue" href="#overview" aria-label="Scroll to the overview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"/></svg>
+  </a>
+</section>
+
+<!-- ═════════ Overview (owner: A) ═════════ -->
+<section class="sec ov" id="overview" aria-labelledby="ov-title">
+  <div class="wrap">
+
+    <!-- the title spans the full content width; the text column and the film card sit side by side below it -->
+    <header class="ov-head">
+      <h2 class="ov-title reveal" id="ov-title"><img class="ov-logo" src="static/img/logo-192.png?v=fe93c8e1" width="96" height="96" alt="" decoding="async"><span><span class="ov-brand">PrismWAM</span>: Decoupling State Representations<br class="ov-br"> in World Action Models</span></h2>
+      <p class="ov-authors reveal"><span class="ov-au">Tianyu Xin<sup>1*</sup></span>, <span class="ov-au">Wanqi Zhong<sup>1*</sup></span>, <span class="ov-au">Bowen Hu<sup>1</sup></span>, <span class="ov-au">Zhangchi Guo<sup>1</sup></span>, <span class="ov-au">Lijie Wang<sup>1</sup></span>, <span class="ov-au">Yiming Wang<sup>1</sup></span>, <span class="ov-au">Haoran Liao<sup>1</sup></span>, <span class="ov-au">Heyang Yu<sup>1</sup></span>, <span class="ov-au">Xiaoyu Tian<sup>1</sup></span>, <span class="ov-au"><a href="https://research.nvidia.com/person/zhiding-yu" target="_blank" rel="noopener">Zhiding Yu</a><sup>2</sup></span>, <span class="ov-au"><a href="https://yimingli-page.github.io/" target="_blank" rel="noopener">Yiming Li</a><sup>1†</sup></span></p>
+      <p class="ov-affil reveal"><span><sup>1</sup>Tsinghua University</span><span><sup>2</sup>NVIDIA</span></p>
+      <p class="ov-affil ov-notes reveal"><span><sup>*</sup>Equal contribution</span><span><sup>†</sup>Corresponding author</span></p>
+    </header>
+
+    <div class="ov-grid">
+      <div class="ov-main">
+        <div class="ov-links reveal">
+          <a class="btn btn-ink ov-watch" href="static/video/prismwam_intro_1080p.mp4?v=d734dcaa" data-film="0" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a.9.9 0 0 0 1.37.77l10.2-6.4a.9.9 0 0 0 0-1.54L9.37 4.83A.9.9 0 0 0 8 5.6z" fill="currentColor"/></svg>
+            Film <small class="num" aria-hidden="true">2:13</small>
+          </a>
+          <a class="btn btn-line" href="static/paper/PrismWAM.pdf" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+            Paper
+          </a>
+          <span class="btn btn-line" aria-disabled="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4" width="17" height="5" rx="1.5"/><path d="M5.5 9v9.5a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9M10 13h4"/></svg>
+            arXiv <small>soon</small>
+          </span>
+          <span class="btn btn-line" aria-disabled="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 8-4 4 4 4M15 8l4 4-4 4"/></svg>
+            Code <small>soon</small>
+          </span>
+          <a class="btn btn-line" href="#citation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 4C6.6 4 6 5 6 6.8v2.4c0 1.4-.7 2.3-2 2.8 1.3.5 2 1.4 2 2.8v2.4C6 19 6.6 20 8.5 20M15.5 4C17.4 4 18 5 18 6.8v2.4c0 1.4.7 2.3 2 2.8-1.3.5-2 1.4-2 2.8v2.4c0 1.8-.6 2.8-2.5 2.8"/></svg>
+            BibTeX
+          </a>
+        </div>
+
+        <div class="ov-tl reveal">
+          <!-- key results: the #1 claim leads full width; numbers and tooltips are refreshed from PRISM_DATA by nav-hero.js -->
+          <ul class="ov-stats" aria-label="Key results">
+            <li class="ov-stat ov-stat-rank" title="Highest score of every compared method, including those with embodied action pretraining"><b class="num">#1</b><span data-stat="top1">Overall on <b class="ov-bm" data-bm="c2r">RoboTwin C2R</b></span></li>
+            <li class="ov-stat ov-stat-rank" title="Second overall on RoboDojo, excluding the Agent track"><b class="num">#2</b><span>Overall on <b class="ov-bm">RoboDojo</b> <span class="ov-agent">(w/o Agent track)</span></span></li>
+            <li class="ov-stat" title="No extra pretraining with robot-action supervision (π0.5 uses 10,000+ h)."><b>No</b><span>Embodied action pretraining</span></li>
+            <li class="ov-stat" title="Pooled out-of-distribution success rate on the real-world tasks, PrismWAM minus OpenWAM"><b class="num" data-stat="ood">+20.0</b><span>Points <b class="ov-k">Real World OOD</b> vs <b class="ov-k">OpenWAM</b></span></li>
+          </ul>
+        </div>
+
+        <div class="ov-tldr reveal">
+          <h3 class="ov-label">TL;DR</h3>
+          <p>Plan the goal in <span class="ov-w">Semantic Space (RGB)</span>, roll out the future in <span class="ov-c">Physical Space (Depth)</span>, and read <span class="ov-a">Actions</span> off the physical rollout.</p>
+        </div>
+
+        <div class="ov-abs reveal">
+          <h3 class="ov-label">Abstract</h3>
+          <p>World Action Models (WAMs) typically represent the world through latent embeddings from pretrained video models, which entangle heterogeneous aspects of the world, from how it looks (e.g., texture and color) to how it is physically configured (e.g., occupancy and pose). This raises an underexplored question: <em>what should constitute the state of a WAM?</em> We argue that the world state should separate how the world appears from how the world evolves under action: the former captures semantic context, while the latter is governed by physical state.</p>
+          <p>To this end, we propose PrismWAM, which decouples physics from semantics while jointly modeling state and action. PrismWAM factorizes an embodied task into a <b class="ov-w">Semantic Planning</b> → <b class="ov-c">Physical Rollout</b> → <b class="ov-a">Executable Action</b> pipeline: given only the initial RGB observation, semantic planning learns to predict the final goal image, while physical rollout predicts the fine-grained evolution toward this goal in depth space; executable actions are then generated from the depth rollout. Without any embodied action pretraining or additional data augmentation, PrismWAM achieves state-of-the-art manipulation performance in both simulation and the real world. Notably, PrismWAM even surpasses a broad range of models with large-scale embodied action pretraining (e.g., OpenWAM-α). More broadly, we reframe World Action Models from modeling how the world looks to how it responds to action, paving the way for action-centric world models grounded in occupancy, flow, tactile sensing, proprioception, and beyond.</p>
+        </div>
+      </div>
+
+      <div class="ov-side reveal" role="group" aria-label="The PrismWAM film">
+        <div class="ov-film" id="ov-film">
+          <button class="ov-poster" type="button" data-film="0" aria-haspopup="dialog" aria-label="Play the 2-minute film from the start">
+            <img src="static/video/film_card.jpg?v=73c756b9" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <span class="ov-poster-shade" aria-hidden="true"></span>
+            <span class="ov-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8.6 5.9v12.2a.9.9 0 0 0 1.37.77l9.7-6.1a.9.9 0 0 0 0-1.54l-9.7-6.1a.9.9 0 0 0-1.37.77z" fill="currentColor"/></svg>
+            </span>
+            <span class="ov-poster-foot" aria-hidden="true">
+              <span class="ov-peek"><span class="ov-peek-t num">0:00</span><span class="ov-peek-l">The question</span></span>
+              <span class="ov-dur badge num">2:13</span>
+              <span class="ov-track"></span>
+            </span>
+          </button>
+          <div class="ov-film-body">
+            <div class="ov-film-head">
+              <h3 class="ov-film-title">Watch the 2-minute film</h3>
+              <span class="ov-film-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                Sound on
+              </span>
+            </div>
+            <ol class="ov-chapters" aria-label="Film chapters"></ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═════════ B. Decoupling lab (owner: B · lab.css / lab.js) ═════════ -->
+<section class="sec sec-tint" id="decoupling" aria-labelledby="lab-h">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Key Insight</p>
+      <h2 class="h-sec" id="lab-h"><span class="lab-hw">Appearance</span> tells you what to act on. <span class="lab-hc">Physics</span> tells you what actions change.</h2>
+      <p class="lead">World action models jointly predict video and actions, but a video latent mixes how things look with how they are arranged. PrismWAM splits the state like light through a prism: semantic context stays in RGB, physical state is modelled in depth.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- ── Part 1: interactive lab ── -->
+      <figure class="lab-fig">
+      <div class="card lab-card reveal" id="lab">
+        <div class="lab-head">
+          <h3 class="lab-title">What changes when a robot acts?</h3>
+          <button class="lab-linkbtn" type="button" data-demo aria-label="Play demo"><span class="lab-stack" data-stack="demobtn" aria-hidden="true"><span class="is-on" data-k="play">Play demo</span><span data-k="stop"><span class="lab-live-dot"></span>Stop demo</span><span data-k="replay">Replay demo</span></span></button>
+        </div>
+
+        <div class="lab-stage">
+          <!-- RGB view -->
+          <div class="lab-top lab-top--rgb">
+            <span class="lab-name"><i aria-hidden="true"></i><b>RGB</b><span class="lab-name-sub">&nbsp;· semantic context</span></span>
+            <span class="lab-status lab-stack" data-stack="rgb" aria-hidden="true">
+              <span class="lab-pill lab-pill--same is-on" data-k="same"><i></i>Unchanged</span>
+              <span class="lab-pill lab-pill--warm" data-k="changed"><i></i>Changed</span>
+            </span>
+          </div>
+          <div class="lab-frame lab-frame--rgb">
+            <img class="lab-img" src="static/img/sim/rgb_clean_t00.webp?v=eca50b8f" width="640" height="480" loading="lazy" decoding="sync" alt="Simulator RGB from the head camera, frame 1 of 32 (reach), default appearance: a wooden roller on a white table.">
+            <img class="lab-img lab-img--fade" width="640" height="480" alt="" aria-hidden="true">
+            <span class="lab-ov lab-ov--rgb" aria-hidden="true"><i></i><span class="lab-ov-t">Lighting changed</span></span>
+          </div>
+
+          <!-- prism link between the two views -->
+          <div class="lab-gutter" aria-hidden="true">
+            <span class="lab-gut-lbl">World state</span>
+            <span class="lab-beam lab-beam--in"></span>
+            <span class="lab-beam lab-beam--w"><span class="lab-pulse"></span></span>
+            <span class="lab-beam lab-beam--c"><span class="lab-pulse"></span></span>
+            <span class="lab-prism"><svg viewBox="0 0 24 24"><path d="M12 3.5 L21 19.5 H3 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- Depth view -->
+          <div class="lab-top lab-top--depth">
+            <span class="lab-name"><i aria-hidden="true"></i><b>Depth</b><span class="lab-name-sub">&nbsp;· physical state</span></span>
+            <span class="lab-status lab-stack" data-stack="depth" aria-hidden="true">
+              <span class="lab-pill lab-pill--keep is-on" data-k="same"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unchanged</span>
+              <span class="lab-pill lab-pill--cool" data-k="changed"><i></i>Changed</span>
+            </span>
+          </div>
+          <div class="lab-frame lab-frame--depth">
+            <img class="lab-img" src="static/img/sim/depth_t00.webp?v=0f6d9a3d" width="640" height="480" loading="lazy" decoding="sync" alt="Simulator depth of the same frame, colour-coded from near (purple) to far (yellow).">
+            <span class="lab-dkey" aria-hidden="true"><span>near</span><i></i><span>far</span></span>
+            <span class="lab-ov lab-ov--d" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unchanged</span>
+          </div>
+        </div>
+
+        <!-- fixed-height summary of the latest change -->
+        <div class="lab-summary lab-stack" data-stack="sum" aria-hidden="true">
+          <p class="is-on" data-k="idle">One moment, two views: <em class="lab-kw">RGB</em> shows what things are, <em class="lab-kc">depth</em> shows where they are.</p>
+          <p data-k="look-light"><em class="lab-kw">New lighting</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-tex"><em class="lab-kw">New textures</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-both"><em class="lab-kw">New lighting and textures</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-clean"><em class="lab-kw">Default appearance again</em>, <em class="lab-kc">identical depth</em>: only the rendering changed.</p>
+          <p data-k="act"><em class="lab-ka">The robot moved</em>: <em class="lab-kc">depth changes with it</em>.</p>
+          <p data-k="both"><em class="lab-kw">RGB</em> changes with lighting, texture and motion; <em class="lab-kc">depth</em> changes only with motion.</p>
+        </div>
+        <p class="vh" aria-live="polite" data-live></p>
+
+        <div class="lab-controls">
+          <div class="lab-group lab-group--look" role="group" aria-labelledby="lab-g1">
+            <div class="lab-group-top">
+              <span class="lab-group-name" id="lab-g1"><i aria-hidden="true"></i>Change the appearance</span>
+            </div>
+            <div class="lab-seg">
+              <button class="lab-opt" type="button" data-look="clean" aria-pressed="true">Default</button>
+              <button class="lab-opt" type="button" data-look="light" aria-pressed="false">Lighting</button>
+              <button class="lab-opt" type="button" data-look="texture" aria-pressed="false">Texture</button>
+              <button class="lab-opt lab-opt--wide" type="button" data-look="lighttex" aria-pressed="false">Lighting + texture</button>
+              <button class="lab-opt" type="button" data-look="random" aria-pressed="false" aria-label="Random appearance">Random</button>
+            </div>
+          </div>
+
+          <div class="lab-group lab-group--act" role="group" aria-labelledby="lab-g2">
+            <div class="lab-group-top">
+              <span class="lab-group-name" id="lab-g2"><i aria-hidden="true"></i>Let the robot act</span>
+            </div>
+            <div class="lab-tl">
+              <button class="lab-play" type="button" data-icon="play" aria-label="Play the episode">
+                <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.9v10.2c0 .6.6.9 1.1.6l8-5.1a.7.7 0 0 0 0-1.2l-8-5.1c-.5-.3-1.1 0-1.1.6z" fill="currentColor"/></svg>
+                <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.6" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/><rect x="9.4" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/></svg>
+                <svg class="i-replay" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.3 6.4A5 5 0 1 1 3 9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.6 2.9v3.8h3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="lab-slider" role="slider" tabindex="0" aria-label="Episode frame" aria-valuemin="1" aria-valuemax="32" aria-valuenow="1" aria-valuetext="Frame 1 of 32, reach" style="--p:0">
+                <span class="lab-phase" style="--a:0;--b:.5645"><span class="lab-phase-fill"></span></span>
+                <span class="lab-phase" style="--a:.5645;--b:.8548"><span class="lab-phase-fill"></span></span>
+                <span class="lab-phase" style="--a:.8548;--b:1"><span class="lab-phase-fill"></span></span>
+                <span class="lab-carrier"><span class="lab-thumb"></span></span>
+                <span class="lab-phaselbl" style="--a:0">Reach</span><span class="lab-phaselbl" style="--a:.5645">Grasp</span><span class="lab-phaselbl" style="--a:.8548">Lift</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption class="fig-cap">RoboTwin Grab Roller, head camera. Appearance variants are re-rendered from the simulator at the same physical state; their depth is identical.</figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ Method (owner: C) ═════════ -->
+<section class="sec" id="method" aria-labelledby="mt-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">How It Works</p>
+      <h2 class="h-sec" id="mt-title">PrismWAM decouples <span class="ov-w">semantic planning</span> from <span class="ov-c">physical rollout</span></h2>
+      <p class="lead">We instantiate this principle with a Mixture-of-Transformers (MoT) architecture built upon a pretrained video backbone. During training, the semantic planner predicts the target from the initial RGB observation and transfers its task-level knowledge to the physical rollout via attention layers, while the action branch learns to map the predicted physical evolution to continuous actions.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- Part 1: video-synced stepper -->
+      <div class="mt-tour reveal" id="mt-tour">
+        <div class="mt-stage" id="mt-stage" role="tabpanel" aria-label="Method walkthrough video">
+          <div class="mt-screen">
+            <video class="mt-video" id="mt-video" muted playsinline loop preload="none" poster="static/video/method.jpg?v=dc6e3cc6"
+                   aria-label="Animated walkthrough of the PrismWAM method: three roles, semantic planning, physical rollout to action, chain attention, training and inference">
+              <source src="static/video/method.mp4?v=7bb3cf8f" type="video/mp4">
+            </video>
+          </div>
+          <div class="mt-ctrl">
+            <button class="mt-play" id="mt-play" type="button" aria-label="Play walkthrough" data-state="paused">
+              <svg class="mt-ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.6v10.8a.6.6 0 0 0 .92.5l8.3-5.4a.6.6 0 0 0 0-1L7.42 4.1a.6.6 0 0 0-.92.5Z" fill="currentColor"/></svg>
+              <svg class="mt-ic-pause" viewBox="0 0 20 20" aria-hidden="true"><rect x="5.2" y="4.2" width="3.4" height="11.6" rx="1.1" fill="currentColor"/><rect x="11.4" y="4.2" width="3.4" height="11.6" rx="1.1" fill="currentColor"/></svg>
+            </button>
+            <div class="mt-scrub" id="mt-scrub" role="slider" tabindex="0" aria-label="Seek the walkthrough" aria-valuemin="0" aria-valuemax="34.5" aria-valuenow="0" aria-valuetext="0:00, Three roles">
+              <span class="mt-seg s1" style="flex-grow:9"><i></i></span>
+              <span class="mt-seg s2" style="flex-grow:7.2"><i></i></span>
+              <span class="mt-seg s3" style="flex-grow:4.1"><i></i></span>
+              <span class="mt-seg s4" style="flex-grow:6.7"><i></i></span>
+              <span class="mt-seg s5" style="flex-grow:7.5"><i></i></span>
+              <span class="mt-hover" aria-hidden="true"><span class="mt-hover-lab"></span></span>
+            </div>
+            <span class="mt-clock num" aria-hidden="true"><span class="mt-clock-t">0:00</span> / 0:34</span>
+          </div>
+        </div>
+
+        <div class="mt-steps" id="mt-steps" role="tablist" aria-label="Method walkthrough" aria-orientation="vertical">
+          <span class="mt-glide" aria-hidden="true"></span>
+          <button class="mt-step s1" type="button" role="tab" id="mt-step-1" aria-controls="mt-stage" aria-selected="true" tabindex="0" data-start="0" data-end="9" data-still="8">
+            <span class="mt-num" aria-hidden="true"><span>1</span></span>
+            <span class="mt-title">Three roles</span>
+            <span class="mt-time num" aria-hidden="true">0:00</span>
+            <span class="mt-desc">What to do, how the world responds, how to act.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s2" type="button" role="tab" id="mt-step-2" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="9" data-end="16.2" data-still="15.5">
+            <span class="mt-num" aria-hidden="true"><span>2</span></span>
+            <span class="mt-title">Semantic planning</span>
+            <span class="mt-time num" aria-hidden="true">0:09</span>
+            <span class="mt-desc">The RGB stream learns the goal from a single intended future frame.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s3" type="button" role="tab" id="mt-step-3" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="16.2" data-end="20.3" data-still="19.6">
+            <span class="mt-num" aria-hidden="true"><span>3</span></span>
+            <span class="mt-title">Physical rollout → action</span>
+            <span class="mt-time num" aria-hidden="true">0:16</span>
+            <span class="mt-desc">Depth predicts the dense future trajectory; actions are read out of the physics rollout.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s4" type="button" role="tab" id="mt-step-4" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="20.3" data-end="27" data-still="25.5">
+            <span class="mt-num" aria-hidden="true"><span>4</span></span>
+            <span class="mt-title">Chain attention</span>
+            <span class="mt-time num" aria-hidden="true">0:20</span>
+            <span class="mt-desc">Observed RGB guides depth, depth guides action. Actions never attend to RGB directly.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s5" type="button" role="tab" id="mt-step-5" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="27" data-end="34.5" data-still="34">
+            <span class="mt-num" aria-hidden="true"><span>5</span></span>
+            <span class="mt-title">Training and inference</span>
+            <span class="mt-time num" aria-hidden="true">0:27</span>
+            <span class="mt-desc">Depth is adapted first, then all streams train jointly. Inference generates no future RGB.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+        </div>
+
+        <!-- narrow screens: the active step's sentence, all five stacked in one cell so the height never changes -->
+        <div class="mt-cap" aria-hidden="true">
+          <p class="mt-cap-v is-on">What to do, how the world responds, how to act.</p>
+          <p class="mt-cap-v">The RGB stream learns the goal from a single intended future frame.</p>
+          <p class="mt-cap-v">Depth predicts the dense future trajectory; actions are read out of the physics rollout.</p>
+          <p class="mt-cap-v">Observed RGB guides depth, depth guides action. Actions never attend to RGB directly.</p>
+          <p class="mt-cap-v">Depth is adapted first, then all streams train jointly. Inference generates no future RGB.</p>
+        </div>
+      </div>
+
+      <!-- Part 2: chain attention matrix + architecture figure -->
+      <div class="mt-sub reveal">
+        <h3 class="mt-sub-title">Information flows one way</h3>
+        <p class="lead mt-sub-lead">Each token group reads only what it needs.</p>
+      </div>
+
+      <div class="mt-arch">
+        <div class="card mt-attn reveal" id="mt-attn">
+          <div class="card-head mt-attn-head">
+            <h4 class="card-title">Chain attention</h4>
+            <div class="seg mt-mode" role="tablist" aria-label="Attention mask">
+              <button type="button" role="tab" aria-selected="true" aria-controls="mt-mx" data-mode="train">Training</button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="mt-mx" data-mode="inf" tabindex="-1">Inference</button>
+            </div>
+          </div>
+          <div class="mt-mx-wrap">
+            <div class="mt-mx" id="mt-mx" data-mode="train" role="group" aria-label="Chain attention mask. Observed RGB reads itself; the RGB goal reads observed RGB; current depth reads observed RGB and itself; future depth reads observed RGB and all depth; actions read depth and actions, never RGB."></div>
+          </div>
+        </div>
+
+        <figure class="card mt-fig reveal">
+          <div class="card-head">
+            <h4 class="card-title">Architecture</h4>
+          </div>
+          <!-- The crop shows the architecture panel (left 2409 px of the 3000 px figure, rendered from the paper PDF). Token hotspots are % boxes on that crop:
+               each one frames a token's thumbnail(s) and label, never the shared towers, the task context or the title. -->
+          <div class="mt-crop" id="mt-crop" data-mode="train">
+            <img src="static/img/fig2_architecture_hd.webp?v=f1848b7a" width="3000" height="1192" loading="lazy" decoding="async" data-zoom=""
+                 alt="PrismWAM architecture. A DiT visual tower takes history and current RGB, a noised sparse future RGB frame (training only), current depth and noised future depth; a DiT action tower, coupled by Mixture-of-Transformers, denoises the future action chunk. Both towers receive the encoded task context. The full figure also shows the chain attention masks for training and inference.">
+            <span class="mt-hs m-rgb" data-t="r0" style="left:17.48%;top:62.58%;width:11.43%;height:25.01%"></span>
+            <span class="mt-hs m-rgb" data-t="rF" style="left:28.11%;top:10.78%;width:14.48%;height:21.28%"></span>
+            <span class="mt-hs m-rgb" data-t="rF" style="left:29.44%;top:63.08%;width:10.35%;height:24.52%"></span>
+            <span class="mt-hs m-dep" data-t="d0" style="left:42.45%;top:63.16%;width:10.35%;height:24.44%"></span>
+            <span class="mt-hs m-dep" data-t="d1" style="left:53.49%;top:10.78%;width:10.45%;height:21.23%"></span>
+            <span class="mt-hs m-dep" data-t="d1" style="left:53.29%;top:63.21%;width:10.35%;height:24.39%"></span>
+            <span class="mt-hs m-dep" data-t="dF" style="left:65.4%;top:10.78%;width:10.68%;height:21.17%"></span>
+            <span class="mt-hs m-dep" data-t="dF" style="left:65.04%;top:63.21%;width:10.66%;height:24.39%"></span>
+            <span class="mt-hs m-act" data-t="a" style="left:79.7%;top:11.17%;width:16.61%;height:17.68%"></span>
+            <span class="mt-hs m-act" data-t="a" style="left:79.66%;top:65.43%;width:16.6%;height:21.41%"></span>
+            <span class="mt-to" style="left:28.11%;top:10.78%;width:14.48%;height:27.57%"><span class="mt-to-chip">Training only</span></span>
+            <span class="mt-to" style="left:29.44%;top:53.99%;width:10.35%;height:33.6%"></span>
+            <button class="mt-zoom" id="mt-zoom" type="button" aria-label="Enlarge the architecture figure"></button>
+          </div>
+          <figcaption class="fig-cap">Mixture-of-Transformers: one visual tower for RGB and depth, one action tower.</figcaption>
+        </figure>
+
+        <!-- readout for the matrix rows and the figure hotspots: every state stacked in one cell, so its height is fixed -->
+        <div class="mt-ex reveal" id="mt-ex"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="sec sec-tint" aria-labelledby="rs-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Results</p>
+      <h2 class="h-sec" id="rs-title">Results across five benchmarks, without embodied action pretraining</h2>
+      <p class="lead">PrismWAM ranks <b class="rs-rk">#1</b> overall on <b>RoboTwin C2R</b> and <b class="rs-rk">#2</b> on <b>RoboDojo</b> (w/o Agent track), ahead of models pretrained on thousands of hours of robot actions.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- 1 · headline numbers (values, model tags and ranks are recomputed from PRISM_DATA by results.js) -->
+      <ul class="rs-stats reveal" aria-label="Headline results">
+        <li class="rs-stat" data-stat="c2r">
+          <p class="rs-stat-label"><span class="rs-sl-l">RoboTwin clean → random</span><span class="rs-sl-s">RoboTwin C2R</span></p>
+          <p class="rs-stat-model"><i aria-hidden="true"></i><span>PrismWAM*</span></p>
+          <p class="rs-stat-val"><span class="rs-stat-num num" data-countup>83.67</span><span class="rs-stat-unit">%</span></p>
+          <p class="rs-stat-rank"><b class="num">#1</b><span>overall</span></p>
+        </li>
+        <li class="rs-stat" data-stat="dojo">
+          <p class="rs-stat-label">RoboDojo</p>
+          <p class="rs-stat-model"><i aria-hidden="true"></i><span>PrismWAM*</span></p>
+          <p class="rs-stat-val"><span class="rs-stat-num num" data-countup>36.23</span><span class="rs-stat-unit"></span></p>
+          <p class="rs-stat-rank"><b class="num">#2</b><span>w/o Agent track</span></p>
+        </li>
+      </ul>
+
+      <!-- 2 · linked leaderboard: five small multiples, one global model highlight -->
+      <div class="card rs-board reveal" id="rs-board">
+        <div class="rs-board-top">
+          <h3 class="card-title rs-board-title">Every benchmark, side by side</h3>
+          <div class="rs-board-ctl">
+            <div class="seg rs-filter" role="tablist" aria-label="Which methods to show">
+              <button type="button" role="tab" aria-selected="true" aria-controls="rs-grid" data-filter="all" id="rs-tab-all"><span class="rs-fl">All methods</span><span class="rs-fs">All</span></button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="rs-grid" data-filter="nopre" id="rs-tab-nopre" tabindex="-1"><span class="rs-fl">Without action pretraining</span><span class="rs-fs">No action pretraining</span></button>
+            </div>
+          </div>
+          <ul class="key rs-key" aria-label="Legend">
+            <li><span class="sq k-ours-light"></span>PrismWAM</li>
+            <li><span class="sq k-ours"></span>PrismWAM*</li>
+            <li><span class="sq k-base"></span>Other methods</li>
+            <li><span class="sq k-pre"></span>Extra embodied action pretraining</li>
+          </ul>
+        </div>
+        <div class="rs-grid" id="rs-grid" role="tabpanel" aria-label="Leaderboards for five benchmarks"></div>
+        <div class="rs-dots" id="rs-dots" role="group" aria-label="Choose a benchmark"></div>
+      </div>
+
+      <!-- 3 · radar + efficiency -->
+      <div class="rs-pair">
+        <div class="card rs-radar-card reveal">
+          <div class="card-head">
+            <h3 class="card-title">Five benchmarks at a glance</h3>
+          </div>
+          <div class="rs-rctl">
+            <div class="seg rs-preset" role="group" aria-label="Which models to draw on the radar">
+              <button type="button" aria-pressed="true" data-preset="nopre"><span class="rs-fl">Without action pretraining</span><span class="rs-fs">No action pretraining</span></button>
+              <button type="button" aria-pressed="false" data-preset="all"><span class="rs-fl">All models</span><span class="rs-fs">All</span></button>
+            </div>
+            <span class="rs-custom" id="rs-custom" title="Your own selection of models">Custom</span>
+          </div>
+          <div class="rs-chips" id="rs-chips" role="group" aria-label="Models drawn on the radar, toggle each"></div>
+          <div class="rs-radar-box" id="rs-radar-box">
+            <svg class="rs-radar" id="rs-radar" tabindex="0" role="application" aria-roledescription="radar chart" aria-describedby="rs-info"></svg>
+          </div>
+          <div class="rs-info" id="rs-info" aria-live="off">
+            <p class="rs-info-1"></p>
+            <div class="rs-info-2"></div>
+          </div>
+        </div>
+
+        <div class="card rs-eff-card reveal">
+          <div class="card-head">
+            <h3 class="card-title">RoboDojo score and success rate</h3>
+          </div>
+          <div class="rs-eff-box" id="rs-eff-box">
+            <svg class="rs-eff" id="rs-eff" role="group" tabindex="-1"></svg>
+          </div>
+          <p class="rs-takeaway" id="rs-takeaway"></p>
+        </div>
+      </div>
+      <p class="note rs-foot">* PrismWAM* is the same method with a larger model.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ Robustness to sensor-like depth noise (paper RQ2, appendix "depth corruption") — robust.css / robust.js ═════════ -->
+<section id="robust" class="sec" aria-labelledby="rb-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Robustness</p>
+      <h2 class="h-sec" id="rb-title">Robust to <span class="nowrap">sensor-like</span> depth noise</h2>
+      <p class="lead">Real depth sensors can add measurement noise and miss readings. We corrupt simulated depth at three sensor-like levels, guided by manufacturers' reported error characteristics, and train and evaluate a model at each. At Level&nbsp;3, the strongest, PrismWAM reaches <b class="claim-num">68.30%</b> average success on RoboTwin clean&nbsp;→&nbsp;random, <span class="nowrap">2.45 points</span> below clean depth.</p>
+    </div>
+
+    <div class="sec-body">
+      <div class="rb-ctl reveal">
+        <div class="seg rb-seg" id="rb-seg" role="tablist" aria-label="Depth corruption level">
+          <button type="button" role="tab" id="rb-t0" data-lv="0" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Clean depth</button>
+          <button type="button" role="tab" id="rb-t1" data-lv="1" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Level 1</button>
+          <button type="button" role="tab" id="rb-t2" data-lv="2" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Level 2</button>
+          <button type="button" role="tab" id="rb-t3" data-lv="3" aria-selected="true" aria-controls="rb-panel">Level 3</button>
+        </div>
+        <!-- narrow screens only: the success figure travels with the sticky control, so a level change is visible next to it -->
+        <p class="rb-mini" aria-hidden="true">Average success <b class="rb-mini-n num">68.30%</b><span class="rb-mini-d num">−2.45 vs clean depth</span></p>
+      </div>
+
+      <div class="rb-grid reveal" id="rb-panel" role="tabpanel" tabindex="0" aria-labelledby="rb-t3" data-lv="3">
+        <!-- left: what the policy sees, and how that level corrupts it (values from the paper's settings table) -->
+        <div class="card rb-obs">
+          <div class="card-head rb-head">
+            <h3 class="card-title">Observed depth</h3>
+          </div>
+
+          <!-- the observation (with its colour scale) beside the recipe that produced it -->
+          <div class="rb-obs-body">
+            <div class="rb-view">
+              <figure class="rb-fig">
+                <img class="rb-img" data-lv="0" src="static/img/robust/clean.jpg?v=18fbc9db" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Clean depth from the head camera: a gripper above a bottle lying on the table, coloured from near to far.">
+                <img class="rb-img" data-lv="1" src="static/img/robust/level1.jpg?v=467869d4" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Level 1: fine range noise and thin, broken holes along the depth edges.">
+                <img class="rb-img" data-lv="2" src="static/img/robust/level2.jpg?v=e6cc05be" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Level 2: stronger noise, wide holes around the gripper and bottle, and a patch hole on the table.">
+                <img class="rb-img is-on" data-lv="3" src="static/img/robust/level3.jpg?v=8e215ede" width="720" height="513" loading="lazy" decoding="async"
+                     alt="Level 3: the strongest noise and widest edge holes, with a patch hole on the table.">
+              </figure>
+              <div class="rb-scale" role="img" aria-label="Colour scale: 0 to 1500 millimetres, near in purple, far in yellow; black is missing depth">
+                <span class="rb-tk">0</span><i class="rb-bar" aria-hidden="true"></i><span class="rb-tk">1500 mm</span>
+                <span class="rb-miss"><i aria-hidden="true"></i>missing</span>
+              </div>
+            </div>
+
+            <div class="rb-recipe">
+              <div class="rb-type">
+                <p class="rb-tn">Metric jitter</p>
+                <p class="rb-td">Range noise that grows with distance</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="sigma" style="--f: 1"><dt>σ at 0 m / 1 m</dt><dd class="rb-v">36 / 60 mm</dd></div>
+                  <div class="rb-row" data-p="shift" style="--f: 1"><dt>Global shift</dt><dd class="rb-v">±50 mm</dd></div>
+                </dl>
+              </div>
+              <div class="rb-type">
+                <p class="rb-tn">Edge missing</p>
+                <p class="rb-td">Holes along depth edges</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="radius" style="--f: 1"><dt>Radius</dt><dd class="rb-v">7 px</dd></div>
+                  <div class="rb-row" data-p="frac" style="--f: .96"><dt>Base fraction</dt><dd class="rb-v">24%</dd></div>
+                </dl>
+              </div>
+              <div class="rb-type">
+                <p class="rb-tn">Patch hole</p>
+                <p class="rb-td">A connected hole for a few frames</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="patch" style="--f: 1"><dt>Patch size</dt><dd class="rb-v">1.5%</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- right: success across the four settings (drawn by robust.js; the table below carries the same numbers) -->
+        <div class="card rb-perf">
+          <div class="card-head rb-head">
+            <h3 class="card-title">Success on RoboTwin clean → random</h3>
+          </div>
+          <div class="rb-perf-body">
+            <div class="rb-side">
+              <div class="rb-sum">
+                <p class="rb-sum-v"><span class="rb-sum-n num">68.30</span><span class="rb-sum-u">%</span></p>
+                <div class="rb-sum-t">
+                  <p class="rb-sum-l"><span>Average, <span class="rb-sum-lv">Level 3</span></span></p>
+                  <p class="rb-delta num">−2.45 points vs clean depth</p>
+                </div>
+              </div>
+              <ul class="key rb-key" aria-hidden="true">
+                <li><span class="rb-kl rb-k-mean"></span>Average</li>
+                <li><span class="rb-kl rb-k-clean"></span>Clean scene</li>
+                <li><span class="rb-kl rb-k-rand"></span>Random scene</li>
+              </ul>
+            </div>
+            <div class="rb-chart" id="rb-chart" aria-hidden="true"></div>
+          </div>
+          <div class="vh">
+            <table>
+              <caption>Success rate (%) on RoboTwin clean → random by depth setting</caption>
+              <thead><tr><th scope="col">Depth</th><th scope="col">Clean scene</th><th scope="col">Random scene</th><th scope="col">Average</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Clean depth</th><td>87.40</td><td>54.10</td><td>70.75</td></tr>
+                <tr><th scope="row">Level 1</th><td>89.80</td><td>52.70</td><td>71.25</td></tr>
+                <tr><th scope="row">Level 2</th><td>87.60</td><td>53.20</td><td>70.40</td></tr>
+                <tr><th scope="row">Level 3</th><td>86.50</td><td>50.10</td><td>68.30</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p class="note rb-note">Each setting is its own model, trained and evaluated with that depth on 50 tasks × 20 episodes per scene. This is a separate run from the 100-episode benchmark in Results (70.57%).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ E. Real world (owner: component E — real.css / real.js) ═════════ -->
+<section class="sec sec-dark" id="real" aria-labelledby="real-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Real Robots</p>
+      <h2 class="h-sec" id="real-title"><span class="claim-num" data-real-claim>+20.0</span> points out of distribution</h2>
+      <p class="lead">Three tasks on physical arms against OpenWAM, same tasks and trial counts. <span class="nowrap">Out-of-distribution</span> trials change the lighting, add distractors, or alter object appearance, placement or the tablecloth.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- 1. Pooled comparison (rows rendered by real.js from PRISM_DATA.REAL_POOLED) -->
+      <figure class="real-pooled reveal" id="real-pooled" aria-labelledby="real-pooled-title">
+        <div class="real-pooled-head">
+          <h3 class="real-pooled-title" id="real-pooled-title">Pooled success, all three tasks</h3>
+        </div>
+        <div class="real-pooled-rows" id="real-pooled-rows"></div>
+      </figure>
+
+      <!-- 2. Real-robot pipeline: animated block diagram. Nodes are an ordered list laid out by CSS grid (two lanes
+           left to right on desktop, two columns top to bottom when narrow); real.js draws the wires, frames the
+           PrismWAM nodes and runs the loop. Facts: paper, Appendix "Views and temporal context" and Sec. 3. -->
+      <div class="rp" id="real-pipe">
+        <figure class="rp-card reveal" aria-labelledby="rp-title">
+          <div class="rp-head">
+            <h3 class="rp-title" id="rp-title">From sensor to action</h3>
+            <p class="rp-lead">One external camera gives RGB and aligned depth; the depth is refined first. Every PrismWAM branch also reads the language instruction and the measured joint state.</p>
+            <button class="rp-play" id="rp-play" type="button" aria-label="Pause animation">
+              <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>
+              <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5z"/></svg>
+            </button>
+          </div>
+          <div class="rp-stage" id="rp-stage">
+            <div class="rp-model" aria-hidden="true"><span class="rp-model-tag"><b>PrismWAM</b><span>Mixture-of-Transformers</span></span></div>
+            <svg class="rp-wires" id="rp-wires" aria-hidden="true" focusable="false"></svg>
+            <ol class="rp-flow" aria-label="Real-robot pipeline, in order">
+              <li class="rp-node rp-cam rp-c-ink" data-k="cam" tabindex="0" aria-labelledby="rp-d-cam" aria-describedby="rp-help">
+                <span class="rp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="2.6"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><path d="M12 16v3.2M9.2 19.5h5.6"/></svg></span>
+                <span class="rp-name">External camera</span>
+              </li>
+              <li class="rp-node rp-media rp-c-warm" data-k="rgb" tabindex="-1" aria-labelledby="rp-d-rgb" aria-describedby="rp-help">
+                <span class="rp-frame"><video class="rp-v" src="static/video/realpipe_rgb.mp4?v=7c93457e" poster="static/video/realpipe_rgb.jpg?v=68f9f552" data-still="static/img/realpipe/rgb.jpg?v=42ae6691" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video></span>
+                <span class="rp-cap"><i class="rp-dot"></i>RGB</span>
+              </li>
+              <li class="rp-node rp-media rp-c-cool" data-k="raw" tabindex="-1" aria-labelledby="rp-d-raw" aria-describedby="rp-help">
+                <span class="rp-frame"><video class="rp-v" id="rp-v-raw" src="static/video/realpipe_raw.mp4?v=a4801663" poster="static/video/realpipe_raw.jpg?v=094c56b6" data-still="static/img/realpipe/depth_raw.jpg?v=b82226a8" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video></span>
+                <span class="rp-cap"><i class="rp-dot"></i>Raw depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-cool" data-k="refine" tabindex="-1" aria-labelledby="rp-d-refine" aria-describedby="rp-help">
+                <span class="rp-name"><span class="nowrap">LingBot-Depth</span></span>
+                <span class="rp-sub">+ causal temporal smoothing</span>
+              </li>
+              <li class="rp-node rp-media rp-c-cool" data-k="refined" tabindex="-1" aria-labelledby="rp-d-refined" aria-describedby="rp-help">
+                <span class="rp-frame rp-wipe" id="rp-wipe">
+                  <canvas class="rp-under" width="480" height="360" aria-hidden="true"></canvas>
+                  <video class="rp-v rp-top" src="static/video/realpipe_refined.mp4?v=73bcb46c" poster="static/video/realpipe_refined.jpg?v=751f1677" data-still="static/img/realpipe/depth_refined.jpg?v=8cd9a78d" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video>
+                  <i class="rp-scan" aria-hidden="true"></i>
+                </span>
+                <span class="rp-cap"><i class="rp-dot"></i>Refined depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-warm" data-k="rgbs" tabindex="-1" aria-labelledby="rp-d-rgbs" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>RGB stream</span>
+                <span class="rp-sub">Semantic planning</span>
+                <span class="rp-ticks" data-ticks="rgb" aria-hidden="true"><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b></span>
+                <span class="rp-tl" aria-hidden="true"><span>t−16</span><span>t</span></span>
+              </li>
+              <li class="rp-node rp-box rp-goal rp-c-warm" data-k="goal" tabindex="-1" aria-labelledby="rp-d-goal" aria-describedby="rp-help">
+                <span class="rp-name">RGB goal <span class="rp-t">t+32</span></span>
+                <span class="rp-sub">Training only</span>
+              </li>
+              <li class="rp-node rp-box rp-c-cool" data-k="depths" tabindex="-1" aria-labelledby="rp-d-depths" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>Depth stream</span>
+                <span class="rp-sub">Physical rollout</span>
+                <span class="rp-ticks" data-ticks="depth" aria-hidden="true"><b class="is-obs"></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></span>
+                <span class="rp-tl" aria-hidden="true"><span>t</span><span>t+32</span></span>
+              </li>
+              <li class="rp-node rp-box rp-c-acc" data-k="act" tabindex="-1" aria-labelledby="rp-d-act" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>Action tower</span>
+                <span class="rp-sub">Reads depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-acc" data-k="cmd" tabindex="-1" aria-labelledby="rp-d-cmd" aria-describedby="rp-help">
+                <span class="rp-name">Joint commands</span>
+                <span class="rp-sub">30 Hz</span>
+                <span class="rp-ticks rp-comb" data-ticks="cmd" aria-hidden="true"></span>
+                <span class="rp-tl" aria-hidden="true"><span>t+1</span><span>t+32</span></span>
+              </li>
+              <li class="rp-node rp-box rp-robot rp-c-acc" data-k="robot" tabindex="-1" aria-labelledby="rp-d-robot" aria-describedby="rp-help">
+                <span class="rp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21h10M8 21v-2.2h5V21"/><circle cx="10.5" cy="16.8" r="1.5"/><path d="M11.5 15.7l3.6-4.1"/><circle cx="16" cy="10.5" r="1.4"/><path d="M14.8 9.8 10 6.8"/><path d="M10.85 5.44 9.15 8.16M10.85 5.44 9.32 4.49M9.15 8.16 7.62 7.21"/></svg></span>
+                <span class="rp-name">Robot arms</span>
+              </li>
+            </ol>
+            <!-- the hovered or focused stage's line, copied in by real.js (screen readers get it as the stage's name) -->
+            <div class="rp-tip" id="rp-tip" aria-hidden="true"></div>
+          </div>
+          <!-- each stage's one line, read by assistive tech as the stage's name (aria-labelledby); shown on screen
+               only in the floating tip above (#rp-tip) while that stage is hovered or focused -->
+          <div class="vh">
+            <span id="rp-d-cam"><b>External camera</b> One external view supplies RGB and aligned depth. No wrist images are used.</span>
+            <span id="rp-d-rgb"><b>RGB</b> Five frames, t−16 to t in steps of 4, resized to 384&thinsp;×&thinsp;320.</span>
+            <span id="rp-d-raw"><b>Raw depth</b> Sensor depth in millimetres, aligned to the RGB view. Black pixels have no reading.</span>
+            <span id="rp-d-refine"><b>LingBot-Depth</b> Refines each raw depth frame; causal temporal smoothing then uses past frames only.</span>
+            <span id="rp-d-refined"><b>Refined depth</b> Stored in millimetres, normalised over 0–1500&thinsp;mm and resized to 384&thinsp;×&thinsp;320. The frame at t is the initial physical state.</span>
+            <span id="rp-d-rgbs"><b>RGB stream</b>, part of PrismWAM. Semantic planning: reads the RGB history to capture task intent.</span>
+            <span id="rp-d-goal"><b>RGB goal</b>, part of PrismWAM. The frame at t+32 is a training target only. Inference generates no future RGB.</span>
+            <span id="rp-d-depths"><b>Depth stream</b>, part of PrismWAM. Physical rollout. Starts from the observed depth at t and predicts t+4, …, t+32, guided by the observed RGB.</span>
+            <span id="rp-d-act"><b>Action tower</b>, part of PrismWAM. Reads the depth rollout and the measured joint state at t.</span>
+            <span id="rp-d-cmd"><b>Joint commands</b> Absolute joint commands for t+1 … t+32 at the native 30&thinsp;Hz.</span>
+            <span id="rp-d-robot"><b>Robot arms</b> Execute the joint commands.</span>
+            <span id="rp-help">Arrow keys move between stages.</span>
+          </div>
+        </figure>
+      </div>
+
+      <!-- 3. Evidence browser: one successful PrismWAM trial per case, played as a gentle tour (real.js).
+           The clips (robot motion at 2×, inference pauses at 6×; 960×540) are listed here so build.py cache-busts their URLs; a <template> is inert,
+           so nothing in it loads until real.js gives the selected case a <video>. -->
+      <div class="real-browser reveal" id="real-browser">
+        <div class="real-tabs-row">
+          <div class="seg real-tabs" id="real-tabs" role="tablist" aria-label="Real-robot task">
+            <span class="real-tabs-ind" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="real-panel" id="real-panel" role="tabpanel">
+          <div class="real-media" id="real-media">
+            <div class="real-viewer" id="real-viewer">
+              <div class="real-stage" id="real-stage"></div>
+              <div class="real-cover" id="real-cover" aria-hidden="true"><img alt="" width="960" height="540" decoding="async" draggable="false"></div>
+              <div class="real-scrim" aria-hidden="true"></div>
+              <span class="real-load" aria-hidden="true"></span>
+              <div class="real-badges" aria-hidden="true">
+                <span class="badge real-badge-mode" id="real-badge-mode"><i></i><span class="real-mode-l"></span><span class="real-mode-s"></span></span>
+                <span class="badge real-badge-speed"><span class="real-spd-pair">2× · 6× <span class="real-speed-x">during </span>inference</span><span class="real-spd-u">2×</span></span>
+              </div>
+              <div class="real-hud">
+                <div class="real-steps" id="real-steps" aria-hidden="true"><span class="real-step"><i></i></span></div>
+                <button class="real-play" id="real-play" type="button" aria-label="Pause video">
+                  <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>
+                  <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5z"/></svg>
+                </button>
+              </div>
+              <template id="real-clips">
+                <video src="static/video/real/plate_id.mp4?v=dd121d6a" poster="static/video/real/plate_id.jpg?v=aeb86d7e"></video>
+                <video src="static/video/real/plate_ood_lights.mp4?v=ad95c9e8" poster="static/video/real/plate_ood_lights.jpg?v=41510f35"></video>
+                <video src="static/video/real/plate_ood_distractors.mp4?v=36337c50" poster="static/video/real/plate_ood_distractors.jpg?v=84058d68"></video>
+                <video src="static/video/real/plate_ood_platecolor.mp4?v=6fd56f63" poster="static/video/real/plate_ood_platecolor.jpg?v=e7d876e7"></video>
+                <video src="static/video/real/ranking_id.mp4?v=579ef2ef" poster="static/video/real/ranking_id.jpg?v=aab388e2"></video>
+                <video src="static/video/real/ranking_ood_lights.mp4?v=d94af9d5" poster="static/video/real/ranking_ood_lights.jpg?v=cea9d514"></video>
+                <video src="static/video/real/ranking_ood_distractors.mp4?v=67d96349" poster="static/video/real/ranking_ood_distractors.jpg?v=ed9bd548"></video>
+                <video src="static/video/real/ranking_ood_tablecloth.mp4?v=8e7d1049" poster="static/video/real/ranking_ood_tablecloth.jpg?v=ea35c493"></video>
+                <video src="static/video/real/microwave_id.mp4?v=030d192d" poster="static/video/real/microwave_id.jpg?v=381244d8"></video>
+                <video src="static/video/real/microwave_ood_lights.mp4?v=002507dc" poster="static/video/real/microwave_ood_lights.jpg?v=d8c7b0ca"></video>
+                <video src="static/video/real/microwave_ood_distractors.mp4?v=32c9ea19" poster="static/video/real/microwave_ood_distractors.jpg?v=e7ae3324"></video>
+                <video src="static/video/real/microwave_ood_blocks.mp4?v=aedcd3f4" poster="static/video/real/microwave_ood_blocks.jpg?v=56268713"></video>
+              </template>
+            </div>
+            <div class="real-rail" id="real-rail"></div>
+          </div>
+
+          <div class="real-info" id="real-info">
+            <div class="real-info-top">
+              <div class="real-swap real-swap-title" id="real-swap-title"></div>
+              <div class="real-instr">
+                <p class="real-label">Instruction</p>
+                <div class="real-swap real-swap-instr" id="real-swap-instr"></div>
+              </div>
+              <div class="real-cond">
+                <p class="real-label">Test conditions</p>
+                <div class="real-swap real-swap-cond" id="real-swap-cond"></div>
+              </div>
+            </div>
+            <div class="real-task-bars" id="real-task-bars"></div>
+          </div>
+        </div>
+        <p class="vh" id="real-live" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ Citation (owner: base) ═════════ -->
+<section class="sec" id="citation" aria-labelledby="cite-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="h-sec" id="cite-title">Citation</h2>
+    </div>
+    <div class="bib">
+      <button class="btn btn-line bib-copy" id="bib-copy" type="button">Copy</button>
+<pre id="bib-code"><span class="bib-l">@misc{xin2026prismwam,
+</span><span class="bib-l bib-f">  <span class="bib-k">title        </span>= {PrismWAM: Decoupling State Representations in World Action Models},
+</span><span class="bib-l bib-f">  <span class="bib-k">author       </span>= {Xin, Tianyu and Zhong, Wanqi and Hu, Bowen and Guo, Zhangchi and Wang, Lijie and Wang, Yiming and Liao, Haoran and Yu, Heyang and Tian, Xiaoyu and Yu, Zhiding and Li, Yiming},
+</span><span class="bib-l bib-f">  <span class="bib-k">howpublished </span>= {<span id="bib-url"></span>},
+</span><span class="bib-l bib-f">  <span class="bib-k">note         </span>= {Project page},
+</span><span class="bib-l bib-f">  <span class="bib-k">year         </span>= {2026}
+</span><span class="bib-l">}</span></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="foot-brand"><img src="static/img/logo-96.png?v=b854b73d" width="22" height="22" alt="" loading="lazy">PrismWAM</span>
+    <span class="foot-links"><a href="#citation">BibTeX</a><a href="#main">Back to top</a></span>
+  </div>
+</footer>
+
+<!-- ═════════ Film modal (owner: A) — open with PRISM.film.open(t) or any [data-film="seconds"] element ═════════ -->
+<div class="film" id="film" role="dialog" aria-modal="true" aria-labelledby="film-title" hidden>
+  <div class="film-panel">
+    <div class="film-bar">
+      <h2 class="film-title" id="film-title">Film</h2>
+      <button class="film-close" type="button" data-film-close aria-label="Close the film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+      </button>
+    </div>
+    <div class="film-player">
+      <!-- poster set from data-poster on first open, so the hidden dialog costs nothing on page load -->
+      <video class="film-video" id="film-video" controls playsinline preload="none" data-poster="static/video/film.jpg?v=984e8663">
+        <source src="static/video/prismwam_intro_1080p.mp4?v=d734dcaa" type="video/mp4">
+      </video>
+      <span class="film-seek" aria-hidden="true"><i></i><span class="film-seek-l">Jumping to</span> <b class="num">0:00</b></span>
+      <!-- shown only if neither streaming nor the in-memory fallback can play the film (e.g. a server without Range support on Safari) -->
+      <div class="film-fail" role="alert" hidden>
+        <p>This browser could not stream the film from this server.</p>
+        <a class="btn btn-light" href="static/video/prismwam_intro_1080p.mp4?v=d734dcaa" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>
+          Download the film <small class="num">MP4, 41 MB</small>
+        </a>
+      </div>
+    </div>
+    <div class="film-chapters" role="group" aria-label="Chapters"></div>
+  </div>
+</div>
+
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged figure" hidden>
+  <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
+  <img alt="">
+</div>
+
+<script src="static/js/data.js?v=29a066a0"></script>
+<script src="static/js/core.js?v=30a7a32f"></script>
+<script src="static/js/nav-hero.js?v=f7b59f82"></script>
+<script src="static/js/lab.js?v=8a8b106c"></script>
+<script src="static/js/method.js?v=3ffe92d5"></script>
+<script src="static/js/results.js?v=bee4eb63"></script>
+<script src="static/js/robust.js?v=1154c55c"></script>
+<script src="static/js/real.js?v=4e34788d"></script>
+</body>
+</html>

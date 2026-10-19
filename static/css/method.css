@@ -1,0 +1,461 @@
+/* PrismWAM — C. Method (#method).
+   Part 1: a dark "screening room" panel — method.mp4 on the left, five video-synced steps on the right.
+   Part 2: the interactive chain-attention matrix beside the architecture figure, linked by per-token hotspots.
+   Every selector is scoped under #method. Hover/selection only change colour, opacity, transform and shadows.
+   Calm finish: small token radii, flat colours (no spectrum or multi-hue gradients), desaturated lavender tokens. */
+
+#method {
+  --mt-rgb: var(--warm);
+  --mt-dep: var(--cool);
+  --mt-act: var(--accent);
+  /* derived tints (no new colours): soft text on the night panel, pale cell highlights */
+  --mt-night-soft: color-mix(in srgb, var(--night-ink) 60%, var(--night-ink-2));
+  --mt-night-dim: color-mix(in srgb, var(--night-ink-2) 90%, transparent);
+  --mt-night-faint: color-mix(in srgb, var(--night-ink-2) 72%, transparent);
+}
+
+/* the heading may use the full content width so it stays on one line on desktop (the lead keeps its 1040px measure) */
+#method .sec-head { max-width: none; }
+
+/* ───────── Part 1 · video-synced stepper ───────── */
+#method .mt-tour {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-areas: "stage steps";
+  align-items: start;
+  gap: 18px;
+  padding: 18px 18px 18px 20px;
+  border-radius: var(--r-xl);
+  color: var(--night-ink);
+  background: var(--night);
+  box-shadow: 0 28px 64px -36px rgba(9, 11, 18, .5), 0 1px 3px rgba(9, 11, 18, .1);
+  isolation: isolate;
+}
+
+#method .mt-stage { grid-area: stage; min-width: 0; }
+#method .mt-screen {
+  position: relative; aspect-ratio: 1920 / 990; border-radius: var(--r-md); overflow: hidden;
+  background: #070910 url("../video/method.jpg") center / cover no-repeat;
+}
+#method .mt-screen::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09);
+}
+#method .mt-video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; background: transparent; }
+
+
+/* control row under the video: play/pause, a segmented scrubber (one segment per step), clock */
+#method .mt-ctrl { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 0 2px 0 0; }
+#method .mt-play {
+  position: relative; flex: none; width: 36px; height: 36px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; color: #fff;
+  border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .07);
+  transition: background-color .2s, border-color .2s, transform .25s var(--ease);
+}
+#method .mt-play svg { width: 16px; height: 16px; grid-area: 1 / 1; transition: opacity .2s, transform .3s var(--ease); }
+#method .mt-play[data-state="paused"] .mt-ic-pause,
+#method .mt-play[data-state="playing"] .mt-ic-play { opacity: 0; transform: scale(.6); }
+#method .mt-play:active { transform: scale(.94); }
+#method .mt-tour.is-busy .mt-play::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 2px solid transparent; border-top-color: var(--accent-night); animation: mt-spin .8s linear infinite;
+}
+@keyframes mt-spin { to { transform: rotate(1turn); } }
+
+#method .mt-scrub {
+  position: relative; flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; gap: 3px;
+  cursor: pointer; touch-action: pan-y; border-radius: var(--r-xs);
+}
+#method .mt-scrub:focus-visible { outline-offset: 2px; }
+#method .mt-seg {
+  position: relative; flex-basis: 0; min-width: 0; height: 4px; border-radius: 3px; overflow: hidden;
+  background: rgba(255, 255, 255, .12); transition: transform .25s var(--ease), background-color .25s;
+}
+#method .mt-seg i { display: block; height: 100%; background: var(--sf); transform-origin: 0 50%; transform: scaleX(0); }
+#method .mt-hover {
+  position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; border-radius: 2px;
+  background: rgba(255, 255, 255, .4); opacity: 0; pointer-events: none; transition: opacity .15s;
+}
+#method .mt-hover-lab {
+  position: absolute; bottom: calc(100% + 6px); left: 0; padding: 4px 7px; border-radius: var(--r-xs); white-space: nowrap;
+  font-size: 11px; font-weight: 500; line-height: 1; color: rgba(255, 255, 255, .78); background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .1);
+  -webkit-backdrop-filter: saturate(160%) blur(12px); backdrop-filter: saturate(160%) blur(12px);
+  transform: translateX(var(--lx, -50%));
+}
+#method .mt-hover-lab b { font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 5px; color: rgba(255, 255, 255, .55); }
+#method .mt-scrub.is-hover .mt-hover { opacity: 1; }
+#method .mt-clock { flex: none; min-width: 78px; text-align: right; font-size: 12.5px; color: var(--night-ink-2); white-space: nowrap; }
+#method .mt-clock-t { color: var(--night-ink); }
+
+/* step list */
+#method .mt-steps {
+  grid-area: steps; position: relative; min-width: 0; align-self: stretch;
+  display: grid; grid-auto-rows: 1fr; gap: 3px;
+}
+/* the active row: one flat tint that slides between rows (no gradient, no glow) */
+#method .mt-glide {
+  position: absolute; left: 0; right: 0; top: 0; height: 20%;
+  border-radius: var(--r-md); pointer-events: none;
+  background: rgba(255, 255, 255, .075);
+  transition: transform .55s var(--ease);
+}
+#method .mt-glide.no-anim { transition: none; }
+
+#method .mt-step {
+  position: relative; z-index: 1; min-width: 0;
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) auto;
+  grid-template-areas: "num title time" ". desc desc" ". bar bar";
+  column-gap: 14px; row-gap: 2px; align-content: center;
+  padding: 9px 16px 9px 16px; margin: 0; border: 0; border-radius: var(--r-md);
+  background: transparent; text-align: left; cursor: pointer; color: var(--night-ink-2);
+  transition: background-color .25s;
+}
+/* flat colour codes: 2 = RGB (warm), 3 = depth (cool), 4 = action (lavender); 1 and 5 stay neutral */
+#method .mt-tour .s1 { --sc: var(--mt-night-soft); --sf: var(--mt-night-soft); }
+#method .mt-tour .s2 { --sc: var(--warm); --sf: var(--warm); }
+#method .mt-tour .s3 { --sc: var(--cool); --sf: var(--cool); }
+#method .mt-tour .s4 { --sc: var(--accent-night); --sf: var(--accent-night); }
+#method .mt-tour .s5 { --sc: var(--mt-night-soft); --sf: var(--mt-night-soft); }
+
+/* number badge: a small rounded square with a faint tint; the active one fills with its flat colour */
+#method .mt-num {
+  grid-area: num; position: relative; align-self: center; margin: -4px 0;
+  width: 26px; height: 26px; border-radius: var(--r-xs); display: grid; place-items: center;
+  background: rgba(255, 255, 255, .07);
+  font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1; color: var(--sc);
+}
+#method .mt-num::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--sf);
+  opacity: 0; transform: scale(.6); transition: opacity .3s, transform .45s var(--ease);
+}
+#method .mt-num span { position: relative; transition: color .25s; }
+#method .mt-title {
+  grid-area: title; align-self: center; min-width: 0;
+  font-size: 15.5px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--night-ink-2); transition: color .25s;
+}
+#method .mt-time { grid-area: time; align-self: center; font-size: 12px; color: var(--mt-night-faint); }
+#method .mt-desc {
+  grid-area: desc; font-size: 13.5px; line-height: 1.42; color: var(--mt-night-dim);
+  text-wrap: balance; transition: color .25s;
+}
+#method .mt-bar {
+  grid-area: bar; display: block; height: 2px; margin-top: 6px; border-radius: 2px; overflow: hidden;
+  background: rgba(255, 255, 255, .09);
+}
+#method .mt-bar i { display: block; height: 100%; background: var(--sf); transform-origin: 0 50%; transform: scaleX(0); border-radius: 2px; }
+#method .mt-step.is-done .mt-bar i { opacity: .32; }
+
+#method .mt-step[aria-selected="true"] .mt-num::before { opacity: 1; transform: none; }
+#method .mt-step[aria-selected="true"] .mt-num span { color: var(--night); }
+#method .mt-step[aria-selected="true"] .mt-title { color: #fff; }
+#method .mt-step[aria-selected="true"] .mt-desc { color: var(--mt-night-soft); }
+#method .mt-step:focus-visible { outline-offset: -2px; border-radius: var(--r-md); }
+
+@media (hover: hover) and (pointer: fine) {
+  #method .mt-step:hover { background-color: rgba(255, 255, 255, .035); }
+  #method .mt-step:hover .mt-title { color: #fff; }
+  #method .mt-play:hover { background-color: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .3); }
+  #method .mt-scrub:hover .mt-seg { transform: scaleY(1.5); }
+}
+
+#method .mt-cap { display: none; grid-area: cap; }
+
+/* ───────── Part 2 · chain attention + architecture ───────── */
+/* sub-section header: left-aligned like the section header; the line under it is a base .lead (same size and colour) */
+#method .mt-sub { max-width: 860px; margin: clamp(64px, 7.5vw, 104px) 0 0; text-align: left; }
+#method .mt-sub-title { font-size: clamp(22px, 2.1vw, 28px); line-height: 1.2; font-weight: 650; letter-spacing: -0.02em; text-wrap: balance; }
+#method .mt-sub-lead { margin-top: 10px; }
+
+/* matrix card | figure card on top, one shared readout strip under both (it explains the rows and the hotspots) */
+#method .mt-arch {
+  display: grid; grid-template-columns: minmax(0, 4.3fr) minmax(0, 7.7fr); grid-template-areas: "attn fig" "ex ex";
+  gap: 16px 24px; align-items: stretch;
+  margin-top: clamp(28px, 3.2vw, 40px);
+}
+
+#method .mt-attn { grid-area: attn; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "head" "mx"; }
+#method .mt-fig { grid-area: fig; }
+#method .mt-attn-head { grid-area: head; align-items: center; flex-wrap: nowrap; gap: 10px; }
+#method .mt-attn-head .card-title { white-space: nowrap; }
+#method .mt-mx-wrap { grid-area: mx; }
+#method .mt-ex { grid-area: ex; }
+#method .mt-mode { flex: none; }
+#method .mt-mode button { height: 32px; padding: 0 14px; font-size: 13.5px; }
+
+/* token labels: one inline run, never two lines */
+#method .tok { display: inline-block; white-space: nowrap; line-height: 1; font-style: normal; letter-spacing: 0; }
+#method .tok { font-family: var(--serif); font-size: 1.12em; }
+#method .tok i { font-style: italic; font-weight: 600; }
+#method .tok sub { font-size: .7em; line-height: 0; vertical-align: -.3em; margin-left: .04em; font-style: normal; font-weight: 500; }
+
+#method .mt-mx-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 14px 0 16px; }
+#method .mt-mx {
+  --cell: 35px; --gap: 4px; --lab: 42px; --pitch: calc(var(--cell) + var(--gap));
+  display: grid; row-gap: var(--gap);
+}
+#method .mt-mx-groups, #method .mt-mx-head, #method .mt-row {
+  display: grid; grid-template-columns: var(--lab) repeat(7, var(--cell)); column-gap: var(--gap);
+}
+#method .mt-mx-groups { margin-bottom: 2px; }
+#method .mt-g {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
+  font-size: 11.5px; font-weight: 650; line-height: 1; white-space: nowrap;
+}
+#method .mt-g::after { content: ""; align-self: stretch; height: 3px; border-radius: 3px; background: var(--gc); transition: transform .55s var(--ease); }
+#method .mt-g.g-rgb { grid-column: 2 / span 2; color: var(--warm-ink); --gc: var(--mt-rgb); transition: transform .55s var(--ease); }
+#method .mt-g.g-dep { grid-column: 4 / span 3; color: var(--cool-ink); --gc: var(--mt-dep); transition: transform .55s var(--ease); }
+#method .mt-g.g-act { grid-column: 7 / span 2; color: var(--accent-ink); --gc: var(--mt-act); transition: transform .55s var(--ease); }
+
+#method .mt-corner {
+  position: relative; display: block; height: 28px; margin: 0 4px 0 2px; color: var(--ink-2);
+  background: linear-gradient(to top right, transparent calc(50% - .6px), var(--line-2) 50%, transparent calc(50% + .6px));
+}
+#method .mt-corner i { position: absolute; font-family: var(--serif); font-size: 15px; line-height: 1; font-weight: 600; font-style: italic; }
+#method .mt-corner .mt-k { top: -2px; right: 0; }
+#method .mt-corner .mt-q { bottom: -2px; left: 0; }
+#method .mt-ch {
+  height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-xs);
+  font-size: 14px; transition: background-color .25s, color .25s, opacity .3s, transform .55s var(--ease);
+}
+#method .m-rgb { --mc: var(--mt-rgb); --mi: var(--warm-ink); --ms: var(--warm-soft); }
+#method .m-dep { --mc: var(--mt-dep); --mi: var(--cool-ink); --ms: var(--cool-soft); }
+#method .m-act { --mc: var(--mt-act); --mi: var(--accent-ink); --ms: var(--accent-soft); }
+#method .mt-ch { color: var(--mi); }
+
+#method .mt-row {
+  position: relative; margin: 0; padding: 0; border: 0; background: transparent; font: inherit; color: inherit;
+  cursor: pointer; border-radius: var(--r-sm); text-align: left;
+  transition: opacity .3s, transform .55s var(--ease);
+}
+#method .mt-row:focus-visible { outline-offset: 2px; border-radius: var(--r-sm); }
+#method .mt-rl {
+  position: relative; height: var(--cell); display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 9px; font-size: 14px; color: var(--mi); border-radius: var(--r-xs);
+  transition: background-color .25s, color .25s;
+}
+#method .mt-rl::before {
+  content: ""; position: absolute; left: 0; top: 0; width: 3px; height: calc(100% + var(--gap));
+  border-radius: 3px; background: var(--mc); transform-origin: 50% 0; transition: transform .55s var(--ease);
+}
+#method .mt-row.is-gend .mt-rl::before { height: 100%; }
+
+#method .mt-c { position: relative; width: var(--cell); height: var(--cell); transition: transform .55s var(--ease), opacity .3s; }
+#method .mt-c i {
+  position: absolute; inset: 0; border-radius: var(--r-xs); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line);
+  transition: transform .4s var(--ease), box-shadow .25s;
+}
+/* "on" cells: the key's modality colour, flat, with an ink-tinted hairline */
+#method .mt-c.on i {
+  background: var(--mc);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mi) 14%, transparent);
+}
+
+/* row focus: the query stays, others dim; its keys light up in the header */
+#method .mt-mx.has-q .mt-row:not(.is-q) { opacity: .26; }
+#method .mt-mx.has-q .mt-ch { opacity: .4; }
+#method .mt-mx.has-q .mt-ch.is-read { opacity: 1; background-color: var(--ms); color: var(--mi); }
+#method .mt-row.is-q .mt-rl { background-color: var(--ms); }
+#method .mt-row.is-q .mt-c.on i {
+  transform: scale(1.06);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mi) 14%, transparent), 0 4px 10px -4px rgba(20, 16, 40, .28);
+}
+#method .mt-row.is-pin .mt-rl { box-shadow: inset 0 0 0 1.5px var(--mc); }
+
+/* inference: the RGB-goal lane folds away; later lanes slide in and the 6×6 mask re-centres (transform only) */
+#method .mt-mx { transition: transform .55s var(--ease); }
+#method .mt-mx[data-mode="inf"] { transform: translate(calc(var(--pitch) * .5), calc(var(--pitch) * .5)); }
+#method .mt-mx[data-mode="inf"] .mt-c,
+#method .mt-mx[data-mode="inf"] .mt-ch { transform: translateX(calc(var(--sx) * var(--pitch))); }
+#method .mt-mx[data-mode="inf"] .mt-row { transform: translateY(calc(var(--sy) * var(--pitch))); }
+#method .mt-mx[data-mode="inf"] .k-rF,
+#method .mt-mx[data-mode="inf"] .mt-row.q-rF { opacity: 0; pointer-events: none; }
+#method .mt-mx[data-mode="inf"] .k-rF i,
+#method .mt-mx[data-mode="inf"] .mt-row.q-rF .mt-c i { transform: scale(.35); }
+#method .mt-mx[data-mode="inf"] .mt-row.q-rF { transform: scale(.92); }
+#method .mt-mx[data-mode="inf"] .g-rgb { transform: translateX(calc(var(--pitch) * -.5)); }
+#method .mt-mx[data-mode="inf"] .g-rgb::after { transform: scaleX(.473); }
+#method .mt-mx[data-mode="inf"] .g-dep,
+#method .mt-mx[data-mode="inf"] .g-act { transform: translateX(calc(var(--pitch) * -1)); }
+#method .mt-mx[data-mode="inf"] .mt-row.q-r0 .mt-rl::before { transform: scaleY(.9); }
+
+/* entrance: cells pop in along the diagonal, once */
+@media (prefers-reduced-motion: no-preference) {
+  #method .mt-mx.is-pre .mt-c i, #method .mt-mx.is-pre .mt-ch, #method .mt-mx.is-pre .mt-rl, #method .mt-mx.is-pre .mt-g { opacity: 0; }
+  #method .mt-mx.is-in .mt-c i { animation: mt-pop .7s var(--ease) backwards; animation-delay: calc(var(--d) * 32ms + 120ms); }
+  #method .mt-mx.is-in .mt-ch, #method .mt-mx.is-in .mt-rl, #method .mt-mx.is-in .mt-g { animation: mt-fade .6s var(--ease) backwards; }
+}
+@keyframes mt-pop { from { opacity: 0; transform: scale(.4); } }
+@keyframes mt-fade { from { opacity: 0; } }
+
+/* explanation panel — every state is stacked in one grid cell, so its height is fixed by the tallest */
+#method .mt-ex {
+  display: grid; border-radius: var(--r-lg); background: var(--mist); border: 1px solid var(--line);
+}
+#method .mt-ex-v {
+  grid-area: 1 / 1; position: relative; padding: 16px 18px 15px 22px; min-width: 0;
+  opacity: 0; visibility: hidden; transform: translateY(5px);
+  transition: opacity .2s, transform .35s var(--ease), visibility 0s linear .35s;
+}
+#method .mt-ex-v.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+#method .mt-ex-v::before {
+  content: ""; position: absolute; left: 0; top: 16px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--mc, var(--line-2));
+}
+#method .mt-ex-v.v-def::before { background: var(--line-2); }
+#method .mt-ex-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 15px; line-height: 24px; font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; }
+#method .mt-ex-name .mt-tk { flex: none; }
+/* two text sizes only: 14px running text, 13px for the secondary lines (reads, notation) */
+#method .mt-ex-txt { margin-top: 3px; font-size: 14px; line-height: 1.5; color: var(--ink-2); text-wrap: balance; }
+#method .mt-ex-reads { margin-top: 9px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+#method .mt-ex-reads > span:first-child { margin-right: 2px; }
+#method .mt-tk {
+  display: inline-flex; align-items: center; justify-content: center; height: 24px; min-width: 32px; padding: 0 7px;
+  border-radius: var(--r-xs); font-size: 13.5px; line-height: 1; white-space: nowrap;
+  background: var(--ms); color: var(--mi); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc) 30%, transparent);
+}
+/* notation line in the two default states: one compact line where it fits, breaking only between items */
+#method .mt-ex-note { display: grid; gap: 7px; margin-top: 12px; font-size: 13px; line-height: 20px; color: var(--ink-2); }
+#method .mt-nrow { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: start; }
+#method .mt-nk { padding-top: 1px; font-size: 12px; line-height: 20px; font-weight: 600; color: var(--ink-3); }
+#method .mt-nitems { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+#method .mt-ni { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+/* token letters: identical chips, letter optically centred (serif italic, like the maths in the paper) */
+#method .mt-nl {
+  display: inline-flex; align-items: center; justify-content: center; flex: none; width: 20px; height: 20px; border-radius: 5px;
+  font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1; font-weight: 600; padding-right: 1px;
+  color: var(--mi); background: var(--ms); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc) 30%, transparent);
+}
+#method .mt-ns { font-family: var(--serif); font-style: italic; font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* architecture figure + per-token hotspots */
+#method .mt-fig { display: flex; flex-direction: column; margin: 0; }
+/* the card matches the matrix card's height; the figure group is centred in the space below the head */
+#method .mt-crop {
+  position: relative; width: 100%; aspect-ratio: 2409 / 1192; margin-top: auto; overflow: hidden; border-radius: var(--r-sm);
+  background: var(--paper); transition: box-shadow .3s;
+}
+#method .mt-fig .card-head { margin-bottom: 16px; }
+#method .mt-crop img { position: absolute; left: 0; top: 0; width: 124.55%; height: 100%; max-width: none; }
+#method .mt-zoom {
+  position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; padding: 0; margin: 0; border: 0;
+  border-radius: inherit; background: transparent; cursor: zoom-in;
+}
+#method .mt-zoom:focus-visible { outline: none; }
+#method .mt-crop:has(.mt-zoom:focus-visible) { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus); }
+
+/* a token hotspot: ::before fades a token the query cannot read, ::after outlines one it reads */
+#method .mt-hs { position: absolute; z-index: 1; pointer-events: none; border-radius: var(--r-xs); }
+#method .mt-hs::before, #method .mt-hs::after { content: ""; position: absolute; border-radius: inherit; opacity: 0; }
+#method .mt-hs::before { inset: 0; background: color-mix(in srgb, var(--paper) 74%, transparent); transition: opacity .35s var(--ease-io); }
+#method .mt-hs::after {
+  inset: -1px; border: 1.5px solid color-mix(in srgb, var(--mc) 80%, transparent);
+  background: color-mix(in srgb, var(--mc) 6%, transparent);
+  transform: scale(.97); transition: opacity .3s, transform .5s var(--ease), box-shadow .3s, background-color .3s;
+}
+#method .mt-hs.is-off::before { opacity: 1; }
+#method .mt-hs.is-read::after, #method .mt-hs.is-q::after { opacity: 1; transform: none; }
+#method .mt-hs.is-q { z-index: 2; }
+#method .mt-hs.is-q::after {
+  border-color: var(--mc); background: color-mix(in srgb, var(--mc) 9%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mc) 24%, transparent);
+}
+
+/* inference: the RGB goal (and its train-only arrows) is hatched out */
+#method .mt-to {
+  position: absolute; z-index: 2; display: grid; place-items: center; pointer-events: none; border-radius: var(--r-xs);
+  border: 1.5px dashed var(--warm);
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--paper) 92%, transparent) 0 5px, color-mix(in srgb, var(--warm-soft) 92%, transparent) 5px 8px);
+  opacity: 0; transform: scale(.94); transition: opacity .35s, transform .5s var(--ease);
+}
+#method .mt-crop[data-mode="inf"] .mt-to { opacity: 1; transform: none; }
+#method .mt-to-chip {
+  padding: 4px 8px; border-radius: var(--r-xs); font-size: 11px; font-weight: 650; line-height: 1; white-space: nowrap;
+  color: var(--warm-ink); background: rgba(255, 255, 255, .8); border: 1px solid color-mix(in srgb, var(--warm) 55%, transparent); box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+}
+@media (hover: hover) and (pointer: fine) {
+  #method .mt-crop:hover { box-shadow: var(--shadow-1); }
+}
+#method .mt-fig .fig-cap { margin-top: 12px; margin-bottom: auto; text-wrap: balance; }  /* one line on wide screens; never a stub when it wraps */
+
+/* ───────── responsive ───────── */
+/* 1000–1219px: side by side still, but the step sentences move under the video so rows stay short */
+@media (min-width: 1000px) and (max-width: 1219px) {
+  #method .mt-tour {
+    grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr);
+    grid-template-areas: "stage steps" "cap steps"; align-items: stretch; row-gap: 14px;
+  }
+  #method .mt-stage { align-self: start; }
+  #method .mt-step { grid-template-areas: "num title time" ". bar bar"; padding: 10px 14px 10px 16px; column-gap: 12px; }
+  #method .mt-desc { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #method .mt-bar { margin-top: 10px; }
+  #method .mt-cap { display: grid; align-self: start; padding: 0 2px 2px; }
+  #method .mt-cap-v {
+    grid-area: 1 / 1; font-size: 15px; line-height: 1.5; color: var(--mt-night-soft); text-wrap: balance;
+    opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .35s var(--ease);
+  }
+  #method .mt-cap-v.is-on { opacity: 1; transform: none; }
+}
+
+/* 720–999px: the readout sits beside the matrix card and the figure takes the full width below */
+@media (min-width: 720px) and (max-width: 999px) {
+  #method .mt-arch { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "attn ex" "fig fig"; gap: 20px; }
+  #method .mt-ex { align-self: start; }  /* as tall as its longest state, not stretched to the matrix card */
+}
+/* below 720px everything stacks: matrix, its readout, then the figure */
+@media (max-width: 719px) {
+  #method .mt-arch { grid-template-columns: minmax(0, 1fr); grid-template-areas: "attn" "ex" "fig"; gap: 14px; }
+}
+
+@media (max-width: 999px) {
+  #method .mt-tour {
+    grid-template-columns: minmax(0, 1fr); grid-template-areas: "steps" "stage" "cap";
+    gap: 14px; padding: 14px; border-radius: var(--r-lg);
+  }
+  #method .mt-glide { display: none; }
+  #method .mt-steps {
+    display: flex; gap: 6px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    margin: 0 -14px; padding: 2px 14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 30px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 30px), transparent);
+  }
+  #method .mt-steps::-webkit-scrollbar { display: none; }
+  #method .mt-step {
+    flex: none; grid-template-columns: 24px auto; grid-template-areas: "num title";
+    column-gap: 8px; align-items: center; height: 40px; padding: 0 14px 0 8px; border-radius: var(--r-sm);
+    background: rgba(255, 255, 255, .05);
+  }
+  #method .mt-step[aria-selected="true"] { background: rgba(255, 255, 255, .12); }
+  #method .mt-num { width: 24px; height: 24px; font-size: 12px; }
+  #method .mt-title { font-size: 14px; }
+  #method .mt-time { display: none; }
+  #method .mt-desc { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #method .mt-bar { position: absolute; left: 40px; right: 15px; bottom: 5px; height: 2px; margin: 0; opacity: 0; transition: opacity .25s; }
+  #method .mt-step[aria-selected="true"] .mt-bar { opacity: 1; }
+  #method .mt-screen { border-radius: var(--r-sm); }
+  #method .mt-cap { display: grid; padding: 2px 2px 4px; }
+  #method .mt-cap-v {
+    grid-area: 1 / 1; font-size: 15px; line-height: 1.5; color: var(--mt-night-soft); text-align: left; text-wrap: balance;
+    opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .35s var(--ease);
+  }
+  #method .mt-cap-v.is-on { opacity: 1; transform: none; }
+
+  #method .mt-mx-wrap { padding: 18px 0; }
+}
+
+@media (max-width: 600px) {
+  #method .mt-ctrl { gap: 10px; margin-top: 10px; }
+  #method .mt-clock { min-width: 70px; font-size: 12px; }
+  #method .mt-mx { --cell: 32px; --gap: 4px; --lab: 36px; }
+  #method .mt-ch, #method .mt-rl { font-size: 13px; }
+  #method .mt-attn-head { flex-wrap: wrap; }
+  #method .mt-to-chip { padding: 3px 6px; font-size: 10px; }  /* the in-figure label names the hatch at every width */
+}
+
+@media (max-width: 370px) {
+  #method .mt-mx { --cell: 29px; --gap: 3px; --lab: 32px; }
+}

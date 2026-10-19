@@ -1,0 +1,27 @@
+<!-- ═════════ Film modal (owner: A) — open with PRISM.film.open(t) or any [data-film="seconds"] element ═════════ -->
+<div class="film" id="film" role="dialog" aria-modal="true" aria-labelledby="film-title" hidden>
+  <div class="film-panel">
+    <div class="film-bar">
+      <h2 class="film-title" id="film-title">Film</h2>
+      <button class="film-close" type="button" data-film-close aria-label="Close the film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+      </button>
+    </div>
+    <div class="film-player">
+      <!-- poster set from data-poster on first open, so the hidden dialog costs nothing on page load -->
+      <video class="film-video" id="film-video" controls playsinline preload="none" data-poster="static/video/film.jpg">
+        <source src="static/video/prismwam_intro_1080p.mp4" type="video/mp4">
+      </video>
+      <span class="film-seek" aria-hidden="true"><i></i><span class="film-seek-l">Jumping to</span> <b class="num">0:00</b></span>
+      <!-- shown only if neither streaming nor the in-memory fallback can play the film (e.g. a server without Range support on Safari) -->
+      <div class="film-fail" role="alert" hidden>
+        <p>This browser could not stream the film from this server.</p>
+        <a class="btn btn-light" href="static/video/prismwam_intro_1080p.mp4" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>
+          Download the film <small class="num">MP4, 41 MB</small>
+        </a>
+      </div>
+    </div>
+    <div class="film-chapters" role="group" aria-label="Chapters"></div>
+  </div>
+</div>

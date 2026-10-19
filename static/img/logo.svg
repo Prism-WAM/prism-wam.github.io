@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="edge" gradientUnits="userSpaceOnUse" x1="21" y1="0" x2="75" y2="0"><stop offset="0" stop-color="#ff9500"/><stop offset=".5" stop-color="#9a86ec"/><stop offset="1" stop-color="#35a7ff"/></linearGradient>
+    <linearGradient id="fill" gradientUnits="userSpaceOnUse" x1="21" y1="74" x2="75" y2="40"><stop offset="0" stop-color="#ff9500" stop-opacity=".16"/><stop offset=".5" stop-color="#9a86ec" stop-opacity=".2"/><stop offset="1" stop-color="#35a7ff" stop-opacity=".16"/></linearGradient>
+    <linearGradient id="bO" gradientUnits="userSpaceOnUse" x1="63" y1="50" x2="94" y2="38"><stop offset="0" stop-color="#ff9500"/><stop offset="1" stop-color="#ff9500" stop-opacity=".5"/></linearGradient>
+    <linearGradient id="bB" gradientUnits="userSpaceOnUse" x1="63" y1="50" x2="94" y2="62"><stop offset="0" stop-color="#35a7ff"/><stop offset="1" stop-color="#35a7ff" stop-opacity=".5"/></linearGradient>
+    <linearGradient id="bI" gradientUnits="userSpaceOnUse" x1="2" y1="61" x2="34" y2="52"><stop offset="0" stop-color="#9a9aa8" stop-opacity=".35"/><stop offset="1" stop-color="#9a9aa8"/></linearGradient>
+  </defs>
+  <!-- the prism body: a faint wash of the three colours -->
+  <path d="M48 18 L75 74 H21 Z" fill="url(#fill)"/>
+  <!-- light in (neutral grey, readable on dark and light), a faint path through the glass, two beams out -->
+  <path d="M2 60.6 L31.5 51.6 L31.5 52.8 L2 61.6 Z" fill="url(#bI)"/>
+  <path d="M31.5 52.2 L63.2 49.6" stroke="#9a9aa8" stroke-opacity=".45" stroke-width=".9"/>
+  <path d="M63.2 49.1 L94 37.2 L94 41.2 L63.2 50.1 Z" fill="url(#bO)"/>
+  <path d="M63.2 49.3 L94 58.8 L94 63 L63.2 50.3 Z" fill="url(#bB)"/>
+  <path d="M48 18 L75 74 H21 Z" fill="none" stroke="url(#edge)" stroke-width="2.6" stroke-linejoin="miter" stroke-miterlimit="12"/>
+</svg>

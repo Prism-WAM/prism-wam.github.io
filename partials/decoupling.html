@@ -1,0 +1,110 @@
+<!-- ═════════ B. Decoupling lab (owner: B · lab.css / lab.js) ═════════ -->
+<section class="sec sec-tint" id="decoupling" aria-labelledby="lab-h">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Key Insight</p>
+      <h2 class="h-sec" id="lab-h"><span class="lab-hw">Appearance</span> tells you what to act on. <span class="lab-hc">Physics</span> tells you what actions change.</h2>
+      <p class="lead">World action models jointly predict video and actions, but a video latent mixes how things look with how they are arranged. PrismWAM splits the state like light through a prism: semantic context stays in RGB, physical state is modelled in depth.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- ── Part 1: interactive lab ── -->
+      <figure class="lab-fig">
+      <div class="card lab-card reveal" id="lab">
+        <div class="lab-head">
+          <h3 class="lab-title">What changes when a robot acts?</h3>
+          <button class="lab-linkbtn" type="button" data-demo aria-label="Play demo"><span class="lab-stack" data-stack="demobtn" aria-hidden="true"><span class="is-on" data-k="play">Play demo</span><span data-k="stop"><span class="lab-live-dot"></span>Stop demo</span><span data-k="replay">Replay demo</span></span></button>
+        </div>
+
+        <div class="lab-stage">
+          <!-- RGB view -->
+          <div class="lab-top lab-top--rgb">
+            <span class="lab-name"><i aria-hidden="true"></i><b>RGB</b><span class="lab-name-sub">&nbsp;· semantic context</span></span>
+            <span class="lab-status lab-stack" data-stack="rgb" aria-hidden="true">
+              <span class="lab-pill lab-pill--same is-on" data-k="same"><i></i>Unchanged</span>
+              <span class="lab-pill lab-pill--warm" data-k="changed"><i></i>Changed</span>
+            </span>
+          </div>
+          <div class="lab-frame lab-frame--rgb">
+            <img class="lab-img" src="static/img/sim/rgb_clean_t00.webp" width="640" height="480" loading="lazy" decoding="sync" alt="Simulator RGB from the head camera, frame 1 of 32 (reach), default appearance: a wooden roller on a white table.">
+            <img class="lab-img lab-img--fade" width="640" height="480" alt="" aria-hidden="true">
+            <span class="lab-ov lab-ov--rgb" aria-hidden="true"><i></i><span class="lab-ov-t">Lighting changed</span></span>
+          </div>
+
+          <!-- prism link between the two views -->
+          <div class="lab-gutter" aria-hidden="true">
+            <span class="lab-gut-lbl">World state</span>
+            <span class="lab-beam lab-beam--in"></span>
+            <span class="lab-beam lab-beam--w"><span class="lab-pulse"></span></span>
+            <span class="lab-beam lab-beam--c"><span class="lab-pulse"></span></span>
+            <span class="lab-prism"><svg viewBox="0 0 24 24"><path d="M12 3.5 L21 19.5 H3 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- Depth view -->
+          <div class="lab-top lab-top--depth">
+            <span class="lab-name"><i aria-hidden="true"></i><b>Depth</b><span class="lab-name-sub">&nbsp;· physical state</span></span>
+            <span class="lab-status lab-stack" data-stack="depth" aria-hidden="true">
+              <span class="lab-pill lab-pill--keep is-on" data-k="same"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unchanged</span>
+              <span class="lab-pill lab-pill--cool" data-k="changed"><i></i>Changed</span>
+            </span>
+          </div>
+          <div class="lab-frame lab-frame--depth">
+            <img class="lab-img" src="static/img/sim/depth_t00.webp" width="640" height="480" loading="lazy" decoding="sync" alt="Simulator depth of the same frame, colour-coded from near (purple) to far (yellow).">
+            <span class="lab-dkey" aria-hidden="true"><span>near</span><i></i><span>far</span></span>
+            <span class="lab-ov lab-ov--d" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unchanged</span>
+          </div>
+        </div>
+
+        <!-- fixed-height summary of the latest change -->
+        <div class="lab-summary lab-stack" data-stack="sum" aria-hidden="true">
+          <p class="is-on" data-k="idle">One moment, two views: <em class="lab-kw">RGB</em> shows what things are, <em class="lab-kc">depth</em> shows where they are.</p>
+          <p data-k="look-light"><em class="lab-kw">New lighting</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-tex"><em class="lab-kw">New textures</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-both"><em class="lab-kw">New lighting and textures</em>, <em class="lab-kc">identical depth</em>: <span class="lab-nw">re-rendered</span> at the same physical state.</p>
+          <p data-k="look-clean"><em class="lab-kw">Default appearance again</em>, <em class="lab-kc">identical depth</em>: only the rendering changed.</p>
+          <p data-k="act"><em class="lab-ka">The robot moved</em>: <em class="lab-kc">depth changes with it</em>.</p>
+          <p data-k="both"><em class="lab-kw">RGB</em> changes with lighting, texture and motion; <em class="lab-kc">depth</em> changes only with motion.</p>
+        </div>
+        <p class="vh" aria-live="polite" data-live></p>
+
+        <div class="lab-controls">
+          <div class="lab-group lab-group--look" role="group" aria-labelledby="lab-g1">
+            <div class="lab-group-top">
+              <span class="lab-group-name" id="lab-g1"><i aria-hidden="true"></i>Change the appearance</span>
+            </div>
+            <div class="lab-seg">
+              <button class="lab-opt" type="button" data-look="clean" aria-pressed="true">Default</button>
+              <button class="lab-opt" type="button" data-look="light" aria-pressed="false">Lighting</button>
+              <button class="lab-opt" type="button" data-look="texture" aria-pressed="false">Texture</button>
+              <button class="lab-opt lab-opt--wide" type="button" data-look="lighttex" aria-pressed="false">Lighting + texture</button>
+              <button class="lab-opt" type="button" data-look="random" aria-pressed="false" aria-label="Random appearance">Random</button>
+            </div>
+          </div>
+
+          <div class="lab-group lab-group--act" role="group" aria-labelledby="lab-g2">
+            <div class="lab-group-top">
+              <span class="lab-group-name" id="lab-g2"><i aria-hidden="true"></i>Let the robot act</span>
+            </div>
+            <div class="lab-tl">
+              <button class="lab-play" type="button" data-icon="play" aria-label="Play the episode">
+                <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.9v10.2c0 .6.6.9 1.1.6l8-5.1a.7.7 0 0 0 0-1.2l-8-5.1c-.5-.3-1.1 0-1.1.6z" fill="currentColor"/></svg>
+                <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.6" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/><rect x="9.4" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/></svg>
+                <svg class="i-replay" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.3 6.4A5 5 0 1 1 3 9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.6 2.9v3.8h3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="lab-slider" role="slider" tabindex="0" aria-label="Episode frame" aria-valuemin="1" aria-valuemax="32" aria-valuenow="1" aria-valuetext="Frame 1 of 32, reach" style="--p:0">
+                <span class="lab-phase" style="--a:0;--b:.5645"><span class="lab-phase-fill"></span></span>
+                <span class="lab-phase" style="--a:.5645;--b:.8548"><span class="lab-phase-fill"></span></span>
+                <span class="lab-phase" style="--a:.8548;--b:1"><span class="lab-phase-fill"></span></span>
+                <span class="lab-carrier"><span class="lab-thumb"></span></span>
+                <span class="lab-phaselbl" style="--a:0">Reach</span><span class="lab-phaselbl" style="--a:.5645">Grasp</span><span class="lab-phaselbl" style="--a:.8548">Lift</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption class="fig-cap">RoboTwin Grab Roller, head camera. Appearance variants are re-rendered from the simulator at the same physical state; their depth is identical.</figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>

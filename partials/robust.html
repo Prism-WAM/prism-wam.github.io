@@ -1,0 +1,116 @@
+<!-- ═════════ Robustness to sensor-like depth noise (paper RQ2, appendix "depth corruption") — robust.css / robust.js ═════════ -->
+<section id="robust" class="sec" aria-labelledby="rb-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Robustness</p>
+      <h2 class="h-sec" id="rb-title">Robust to <span class="nowrap">sensor-like</span> depth noise</h2>
+      <p class="lead">Real depth sensors can add measurement noise and miss readings. We corrupt simulated depth at three sensor-like levels, guided by manufacturers' reported error characteristics, and train and evaluate a model at each. At Level&nbsp;3, the strongest, PrismWAM reaches <b class="claim-num">68.30%</b> average success on RoboTwin clean&nbsp;→&nbsp;random, <span class="nowrap">2.45 points</span> below clean depth.</p>
+    </div>
+
+    <div class="sec-body">
+      <div class="rb-ctl reveal">
+        <div class="seg rb-seg" id="rb-seg" role="tablist" aria-label="Depth corruption level">
+          <button type="button" role="tab" id="rb-t0" data-lv="0" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Clean depth</button>
+          <button type="button" role="tab" id="rb-t1" data-lv="1" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Level 1</button>
+          <button type="button" role="tab" id="rb-t2" data-lv="2" aria-selected="false" aria-controls="rb-panel" tabindex="-1">Level 2</button>
+          <button type="button" role="tab" id="rb-t3" data-lv="3" aria-selected="true" aria-controls="rb-panel">Level 3</button>
+        </div>
+        <!-- narrow screens only: the success figure travels with the sticky control, so a level change is visible next to it -->
+        <p class="rb-mini" aria-hidden="true">Average success <b class="rb-mini-n num">68.30%</b><span class="rb-mini-d num">−2.45 vs clean depth</span></p>
+      </div>
+
+      <div class="rb-grid reveal" id="rb-panel" role="tabpanel" tabindex="0" aria-labelledby="rb-t3" data-lv="3">
+        <!-- left: what the policy sees, and how that level corrupts it (values from the paper's settings table) -->
+        <div class="card rb-obs">
+          <div class="card-head rb-head">
+            <h3 class="card-title">Observed depth</h3>
+          </div>
+
+          <!-- the observation (with its colour scale) beside the recipe that produced it -->
+          <div class="rb-obs-body">
+            <div class="rb-view">
+              <figure class="rb-fig">
+                <img class="rb-img" data-lv="0" src="static/img/robust/clean.jpg" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Clean depth from the head camera: a gripper above a bottle lying on the table, coloured from near to far.">
+                <img class="rb-img" data-lv="1" src="static/img/robust/level1.jpg" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Level 1: fine range noise and thin, broken holes along the depth edges.">
+                <img class="rb-img" data-lv="2" src="static/img/robust/level2.jpg" width="720" height="513" loading="lazy" decoding="async" aria-hidden="true"
+                     alt="Level 2: stronger noise, wide holes around the gripper and bottle, and a patch hole on the table.">
+                <img class="rb-img is-on" data-lv="3" src="static/img/robust/level3.jpg" width="720" height="513" loading="lazy" decoding="async"
+                     alt="Level 3: the strongest noise and widest edge holes, with a patch hole on the table.">
+              </figure>
+              <div class="rb-scale" role="img" aria-label="Colour scale: 0 to 1500 millimetres, near in purple, far in yellow; black is missing depth">
+                <span class="rb-tk">0</span><i class="rb-bar" aria-hidden="true"></i><span class="rb-tk">1500 mm</span>
+                <span class="rb-miss"><i aria-hidden="true"></i>missing</span>
+              </div>
+            </div>
+
+            <div class="rb-recipe">
+              <div class="rb-type">
+                <p class="rb-tn">Metric jitter</p>
+                <p class="rb-td">Range noise that grows with distance</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="sigma" style="--f: 1"><dt>σ at 0 m / 1 m</dt><dd class="rb-v">36 / 60 mm</dd></div>
+                  <div class="rb-row" data-p="shift" style="--f: 1"><dt>Global shift</dt><dd class="rb-v">±50 mm</dd></div>
+                </dl>
+              </div>
+              <div class="rb-type">
+                <p class="rb-tn">Edge missing</p>
+                <p class="rb-td">Holes along depth edges</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="radius" style="--f: 1"><dt>Radius</dt><dd class="rb-v">7 px</dd></div>
+                  <div class="rb-row" data-p="frac" style="--f: .96"><dt>Base fraction</dt><dd class="rb-v">24%</dd></div>
+                </dl>
+              </div>
+              <div class="rb-type">
+                <p class="rb-tn">Patch hole</p>
+                <p class="rb-td">A connected hole for a few frames</p>
+                <dl class="rb-rows">
+                  <div class="rb-row" data-p="patch" style="--f: 1"><dt>Patch size</dt><dd class="rb-v">1.5%</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- right: success across the four settings (drawn by robust.js; the table below carries the same numbers) -->
+        <div class="card rb-perf">
+          <div class="card-head rb-head">
+            <h3 class="card-title">Success on RoboTwin clean → random</h3>
+          </div>
+          <div class="rb-perf-body">
+            <div class="rb-side">
+              <div class="rb-sum">
+                <p class="rb-sum-v"><span class="rb-sum-n num">68.30</span><span class="rb-sum-u">%</span></p>
+                <div class="rb-sum-t">
+                  <p class="rb-sum-l"><span>Average, <span class="rb-sum-lv">Level 3</span></span></p>
+                  <p class="rb-delta num">−2.45 points vs clean depth</p>
+                </div>
+              </div>
+              <ul class="key rb-key" aria-hidden="true">
+                <li><span class="rb-kl rb-k-mean"></span>Average</li>
+                <li><span class="rb-kl rb-k-clean"></span>Clean scene</li>
+                <li><span class="rb-kl rb-k-rand"></span>Random scene</li>
+              </ul>
+            </div>
+            <div class="rb-chart" id="rb-chart" aria-hidden="true"></div>
+          </div>
+          <div class="vh">
+            <table>
+              <caption>Success rate (%) on RoboTwin clean → random by depth setting</caption>
+              <thead><tr><th scope="col">Depth</th><th scope="col">Clean scene</th><th scope="col">Random scene</th><th scope="col">Average</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Clean depth</th><td>87.40</td><td>54.10</td><td>70.75</td></tr>
+                <tr><th scope="row">Level 1</th><td>89.80</td><td>52.70</td><td>71.25</td></tr>
+                <tr><th scope="row">Level 2</th><td>87.60</td><td>53.20</td><td>70.40</td></tr>
+                <tr><th scope="row">Level 3</th><td>86.50</td><td>50.10</td><td>68.30</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p class="note rb-note">Each setting is its own model, trained and evaluated with that depth on 50 tasks × 20 episodes per scene. This is a separate run from the 100-episode benchmark in Results (70.57%).</p>
+    </div>
+  </div>
+</section>

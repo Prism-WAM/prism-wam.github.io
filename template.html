@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrismWAM: Decoupling State Representations in World Action Models</title>
+  <meta name="description" content="PrismWAM decouples semantic context (RGB) from physical state (depth) in World Action Models: Semantic Planning → Physical Rollout → Executable Action. Best among methods without embodied action pretraining on three of the five simulation benchmarks; first overall on RoboTwin C2R and second on RoboDojo (w/o Agent track).">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PrismWAM: Decoupling State Representations in World Action Models">
+  <meta property="og:description" content="Plan in RGB, roll out physics in depth, act from the rollout. Best among methods without embodied action pretraining on three of the five simulation benchmarks; first overall on RoboTwin C2R and second on RoboDojo (w/o Agent track).">
+  <meta property="og:image" content="static/video/hero_end.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#090b12">
+  <!-- Served behind a path-prefix proxy: ".../7860" must become ".../7860/" or relative asset paths break.
+       Then mark JS as running (.reveal blocks start hidden only under .js), with a failsafe that shows them
+       if core.js never wires its observer (it clears __prismRevealFS when it does). -->
+  <script>(function () {
+    var p = location.pathname, d = document.documentElement;
+    if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(p)) { location.replace(p + "/" + location.search + location.hash); return; }
+    d.classList.add("js");
+    document.addEventListener("DOMContentLoaded", function () {
+      window.__prismRevealFS = setTimeout(function () { d.classList.add("reveal-off"); }, 1500);
+    });
+  })();</script>
+  <link rel="icon" type="image/png" sizes="64x64" href="static/img/favicon-64.png">
+  <link rel="apple-touch-icon" href="static/img/apple-touch-icon.png">
+  <!-- fonts are self-hosted (@font-face in base.css); preload the one every visitor needs -->
+  <link rel="preload" href="static/fonts/google-sans-flex-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="static/css/base.css">
+  <link rel="stylesheet" href="static/css/nav-hero.css">
+  <link rel="stylesheet" href="static/css/lab.css">
+  <link rel="stylesheet" href="static/css/method.css">
+  <link rel="stylesheet" href="static/css/results.css">
+  <link rel="stylesheet" href="static/css/robust.css">
+  <link rel="stylesheet" href="static/css/real.css">
+</head>
+<body>
+
+<!-- @partial nav -->
+
+<main id="main">
+<!-- @partial hero -->
+<!-- @partial overview -->
+<!-- @partial decoupling -->
+<!-- @partial method -->
+<!-- @partial results -->
+<!-- @partial robust -->
+<!-- @partial real -->
+<!-- @partial citation -->
+</main>
+
+<!-- @partial footer -->
+<!-- @partial film-modal -->
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged figure" hidden>
+  <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
+  <img alt="">
+</div>
+
+<script src="static/js/data.js"></script>
+<script src="static/js/core.js"></script>
+<script src="static/js/nav-hero.js"></script>
+<script src="static/js/lab.js"></script>
+<script src="static/js/method.js"></script>
+<script src="static/js/results.js"></script>
+<script src="static/js/robust.js"></script>
+<script src="static/js/real.js"></script>
+</body>
+</html>

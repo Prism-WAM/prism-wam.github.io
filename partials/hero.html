@@ -1,0 +1,33 @@
+<!-- ═════════ Hero (owner: A) — the whole film frame, fitted inside the first screen ═════════ -->
+<section class="hero" id="top" aria-label="Introduction">
+  <h1 class="vh" id="hero-title">PrismWAM: Decoupling State Representations in World Action Models</h1>
+
+  <div class="hero-frame">
+    <!-- no autoplay and preload="none": nav-hero.js switches to preload="auto" and plays (muted) only when motion is
+         allowed, so reduced-motion visitors (who get the hero_end.jpg still) never download the clip unless they ask -->
+    <video class="hero-video" id="hero-video" muted playsinline preload="none" disablepictureinpicture
+           poster="static/video/hero_start.jpg" aria-hidden="true">
+      <!-- the whole 16:9 frame, music only; desktop: 2560x1440 (60 fps, ~5.5 Mb/s, so it never stalls on a slow link); phones: 1920x1080 -->
+      <source src="static/video/hero_1440.mp4" type="video/mp4" media="(min-width: 901px)">
+      <source src="static/video/hero_1080.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="hero-ctrl" id="hero-ctrl">
+    <button class="hero-btn hero-sound" id="hero-sound" type="button" aria-pressed="false" aria-label="Turn sound on">
+      <svg class="hero-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="hero-ring-bg" cx="22" cy="22" r="20"/></svg>
+      <svg class="hero-ic hero-ic-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 5.5 6.6 8.8H4.2a.7.7 0 0 0-.7.7v5a.7.7 0 0 0 .7.7h2.4l3.9 3.3z" fill="currentColor"/><path d="m15.6 9.6 4.8 4.8M20.4 9.6l-4.8 4.8"/></svg>
+      <svg class="hero-ic hero-ic-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 5.5 6.6 8.8H4.2a.7.7 0 0 0-.7.7v5a.7.7 0 0 0 .7.7h2.4l3.9 3.3z" fill="currentColor"/><path d="M14.6 9.2a4 4 0 0 1 0 5.6M17.4 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>
+    </button>
+    <button class="hero-btn hero-replay" id="hero-replay" type="button" data-state="playing" aria-label="Pause the opening animation">
+      <svg class="hero-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="hero-ring-bg" cx="22" cy="22" r="20"/><circle class="hero-ring-fg" cx="22" cy="22" r="20"/></svg>
+      <svg class="hero-ic hero-ic-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor"/><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor"/></svg>
+      <svg class="hero-ic hero-ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.8v12.4a.9.9 0 0 0 1.37.77l9.9-6.2a.9.9 0 0 0 0-1.54l-9.9-6.2a.9.9 0 0 0-1.37.77z" fill="currentColor"/></svg>
+      <svg class="hero-ic hero-ic-replay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.2v4.6h4.6"/></svg>
+    </button>
+  </div>
+
+  <a class="hero-cue" href="#overview" aria-label="Scroll to the overview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"/></svg>
+  </a>
+</section>

@@ -1,0 +1,609 @@
+/* PrismWAM — D. Results (#results). Every selector is scoped to #results, except the model card
+   (.rs-mc*), which lives inside the shared .tip appended to <body>.
+   Interaction only changes opacity / colour / transform / box-shadow, so nothing reflows on hover.
+   Small Apple-like radii from the base tokens only (no pill shapes); one desaturated lavender for PrismWAM. */
+
+#results {
+  --rs-name-w: 118px;
+  --rh: 24px;
+  --rs-val-w: 50px;
+  --rs-pill-w: 112px;
+  --rs-pill-s: 64px;
+  --rs-hl-hatch: repeating-linear-gradient(135deg, #a3a8b3 0 4px, #868b97 4px 5.5px);
+  --rs-bpad: clamp(18px, 2.4vw, 32px);
+  --rs-gap-x: 18px;   /* between leaderboard panels */
+  --rs-ppad: 14px;    /* panel padding (desktop) */
+}
+
+/* the section sits on the tint band (sec-tint); white cards lift off it */
+#results .card { box-shadow: var(--shadow-1); }
+
+/* ───────── 1 · stat strip ───────── */
+/* The headline numbers are equal grey cards, one per column (two today: RoboTwin C2R | RoboDojo), each over its own
+   panel in the board's 2-up top row: the cards share the board's outer edges and their gap is centred on the gap
+   between the two panels. Card gaps match the radar / bubble pair below. */
+#results { --rs-card-gap: clamp(16px, 2vw, 24px); }
+#results .rs-stats {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--rs-card-gap);
+  margin: 0 0 var(--rs-card-gap);
+}
+/* each card fills its whole column at rest; a grid of label / model / number / rank. Narrow cards stack the rank
+   under the number; wide ones (container query below) put it at the right end of the number's line */
+#results .rs-stat {
+  container: rs-stat / inline-size;
+  position: relative; min-width: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr); align-content: start;
+  padding: clamp(18px, 2.3vw, 30px) calc(var(--rs-bpad) + 1px) clamp(20px, 2.4vw, 32px);   /* text on the board title's edge */
+  border-radius: var(--r-xl); background-color: rgba(29, 29, 31, .042);
+  cursor: default; outline: none;
+  transition: background-color .2s ease, box-shadow .2s ease;
+}
+#results .rs-stat-label {
+  font-size: 17px; font-weight: 600; letter-spacing: -0.012em; color: var(--ink); line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#results .rs-sl-s { display: none; }
+/* short label when the card itself is too narrow for "RoboTwin clean → random" (two-up phone cards) */
+@container rs-stat (max-width: 185px) {
+  #results .rs-sl-l { display: none; }
+  #results .rs-sl-s { display: inline; }
+}
+/* which model produced the number: fixed one-line slot, lavender like its bars */
+#results .rs-stat-model {
+  display: flex; align-items: center; gap: 7px; margin-top: 4px; height: 18px;
+  font-size: 13px; font-weight: 600; line-height: 18px; color: #6052b8; white-space: nowrap;   /* --accent-ink, a shade deeper: AA on the grey card, also on hover */
+}
+#results .rs-stat-model i { flex: none; width: 12px; height: 8px; border-radius: 0 2px 2px 0; background: var(--accent-light); }
+#results .rs-stat.is-15b .rs-stat-model i { background: var(--accent); }
+#results .rs-stat-val {
+  display: flex; align-items: baseline; gap: 4px; min-width: 0; margin: 12px 0 16px;
+  font-size: clamp(44px, 4.6vw, 64px); line-height: 1; font-weight: 620; letter-spacing: -0.035em; color: var(--ink);
+  white-space: nowrap;
+}
+#results .rs-stat-num { font-variant-numeric: tabular-nums; }
+#results .rs-stat-unit { font-size: .44em; font-weight: 550; letter-spacing: 0; color: var(--ink-2); }
+#results .rs-stat-of { margin-left: .08em; color: var(--ink-3); font-weight: 500; }
+/* the rank is the point of each card: a solid badge in PrismWAM's ink */
+#results .rs-stat-rank {
+  justify-self: start; display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%; height: 38px; padding: 0 15px 0 13px;
+  border-radius: var(--r-sm); background: var(--accent-ink); color: #fff;
+  font-size: 15px; font-weight: 550; line-height: 38px; white-space: nowrap; overflow: hidden;
+}
+#results .rs-stat-rank b { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+#results .rs-stat-rank[hidden] { display: none; }
+/* wide cards: number left, rank at the right end of the same line, centred on the figures */
+@container rs-stat (min-width: 330px) {
+  #results .rs-stat-label, #results .rs-stat-model { grid-column: 1 / span 2; }   /* over the number and the rank (an implicit column) */
+  #results .rs-stat-val { grid-column: 1; margin-bottom: 0; }
+  #results .rs-stat-rank { grid-column: 2; grid-row: 3; align-self: center; margin: 12px 0 0 20px; }
+}
+
+/* ───────── 2 · leaderboard ───────── */
+#results .rs-board { padding: var(--rs-bpad); }
+#results .rs-fs, #results .rs-dots { display: none; }
+#results .rs-board-top {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: 12px 28px; margin-bottom: clamp(16px, 2vw, 26px);
+}
+#results .rs-board-title { min-width: 0; }
+#results .rs-board-ctl { display: flex; min-width: 0; }
+#results .rs-key { flex: 1 0 100%; justify-content: flex-start; gap: 6px 18px; margin-top: 2px; }
+#results .rs-key .sq { width: 14px; height: 9px; border-radius: 0 3px 3px 0; }
+#results .rs-key .k-base { box-shadow: inset 0 0 0 1px var(--line-2); }
+#results .rs-nm { white-space: nowrap; }
+
+#results .rs-grid { container: rs-grid / inline-size; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px var(--rs-gap-x); }
+/* five benchmarks (data-n, set by results.js): 2 + 3 on one six-track grid. The two headline benchmarks share the top
+   row, each under its stat tile (RoboTwin C2R, RoboDojo); the LIBERO family fills the row below. No empty cell. */
+#results .rs-grid[data-n="5"] { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 16px; }
+#results .rs-grid[data-n="5"] > .rs-panel { grid-column: span 2; }
+#results .rs-grid[data-n="5"] > .rs-panel:nth-child(-n+2) { grid-column: span 3; }
+#results .rs-panel {
+  --rs-pbg: var(--paper);
+  container: rs-panel / inline-size;
+  position: relative; min-width: 0; padding: var(--rs-ppad) var(--rs-ppad) 10px; border-radius: var(--r-md);
+  background-color: var(--rs-pbg);
+  transition: box-shadow .25s ease, background-color .25s ease;
+}
+#results .rs-panel.is-axis { --rs-pbg: var(--mist); }
+/* linked from the radar: an accent hairline and a faint tint (accent at 5% over white, opaque so the axis-break gap matches) */
+#results .rs-panel.is-linked { --rs-pbg: #faf9fc; box-shadow: 0 0 0 1.5px var(--accent-light), 0 8px 24px rgba(95, 82, 166, .08); }
+#results .rs-ph { position: relative; margin-bottom: 12px; }
+#results .rs-ph-text { min-width: 0; }
+#results .rs-ph-title { padding-right: calc(var(--rs-pill-w) + 8px); }
+#results .rs-ph-title {
+  font-size: 15px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#results .rs-ph-sub {
+  margin-top: 3px; font-size: 12.5px; font-weight: 550; line-height: 17px; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#results .rs-t-s, #results .rs-rk-short { display: none; }
+#results .rs-ph-rank {
+  flex: none; display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px;
+  position: absolute; top: -2px; right: 0;
+  width: var(--rs-pill-w); height: 24px; padding-left: 10px; border-radius: var(--r-xs);
+  background: var(--accent-soft); color: var(--accent-ink); font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+#results .rs-ph-rank i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+#results .rs-ph-rank b { font-weight: 650; }
+#results .rs-ph-rank small { font-size: 10.5px; }
+
+/* the rows box is exactly as tall as the visible rows: when the filter hides rows it shrinks (and the panel, the grid
+   row and everything below follow), the axis and its tick ride on its bottom edge */
+#results { --rs-move: .42s; }
+#results .rs-rows {
+  position: relative; height: calc(var(--vis) * var(--rh)); margin-bottom: 24px;
+  transition: height var(--rs-move) var(--ease);
+}
+#results .rs-axis { position: absolute; top: -3px; bottom: -3px; left: calc(var(--rs-name-w) + 10px); width: 1px; }
+#results .rs-axis::before { content: ""; position: absolute; inset: 0; background: var(--line-2); }
+#results .rs-axis-end { position: absolute; left: 0; bottom: 0; width: 1px; height: 0; }
+#results .rs-tick {
+  position: absolute; top: 0; left: 0; margin-top: 9px; transform: translateX(-50%);
+  font-size: 10.5px; line-height: 1; color: var(--ink-2); white-space: nowrap;
+}
+#results .rs-brk { position: absolute; z-index: 1; left: -6px; bottom: -5px; width: 12px; height: 9px; max-width: none; overflow: visible; fill: none; stroke-linecap: round; }
+#results .rs-brk path { stroke: var(--ink-2); stroke-width: 1.3; }
+#results .rs-axis-end.is-broken::after {
+  /* gap in the axis behind the break glyph, in the panel's own background colour */
+  content: ""; position: absolute; left: -2px; bottom: -3px; width: 5px; height: 4px; background: var(--rs-pbg);
+  transition: background-color .25s ease;
+}
+
+#results .rs-row {
+  position: absolute; left: 0; right: 0; top: 0; height: var(--rh);
+  display: flex; align-items: center; gap: 10px; border-radius: var(--r-xs); cursor: default;
+  transform: translate3d(0, calc(var(--slot) * var(--rh)), 0);
+  transform-origin: 50% 0;
+  transition: transform var(--rs-move) var(--ease), opacity .28s ease, visibility 0s linear 0s;
+  -webkit-tap-highlight-color: transparent;
+}
+#results .rs-row::before {
+  content: ""; position: absolute; z-index: -1; top: 1px; bottom: 1px; left: -8px; right: -8px; border-radius: var(--r-sm);
+  background: var(--mist-2); opacity: 0; transition: opacity .2s ease;
+}
+#results .rs-row:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; }
+#results .rs-name {
+  flex: none; width: var(--rs-name-w); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 13px; line-height: var(--rh); color: var(--ink-2); transition: color .2s ease;
+}
+#results .rs-name sub, #results .rs-chip sub, #results .rs-info sub { font-size: .72em; line-height: 0; vertical-align: -0.22em; }
+#results .rs-track { position: relative; flex: 1 1 auto; min-width: 0; height: 100%; margin-right: var(--rs-val-w); }
+#results .rs-bar { position: absolute; left: 0; right: 0; top: 50%; height: 12px; margin-top: -6px; overflow: hidden; }
+#results .rs-fill {
+  --dl: calc(var(--p, 0) * 70ms + var(--k, 0) * 26ms);
+  position: absolute; inset: 0; border-radius: 0 3px 3px 0; background: var(--base);
+  transform: translate3d(-100%, 0, 0);
+  transition: transform .95s var(--ease) var(--dl);
+}
+#results .rs-fill::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: var(--base-hover); opacity: 0; transition: opacity .2s ease;
+}
+#results .rs-row.is-pre .rs-fill { background: var(--base-pre); }
+#results .rs-row.is-pre .rs-fill::after { background: var(--rs-hl-hatch); }
+#results .rs-row.is-ours .rs-fill { background: var(--accent-light); }
+#results .rs-row.is-15b .rs-fill { background: var(--accent); }
+#results .rs-row.is-ours .rs-fill::after { display: none; }
+#results .rs-board.is-grown .rs-fill { transform: translate3d(calc((var(--w) - 1) * 100%), 0, 0); }
+#results .rs-val {
+  --dl: calc(var(--p, 0) * 70ms + var(--k, 0) * 26ms + 420ms);
+  position: absolute; top: 50%; left: calc(var(--w) * 100%); margin-left: 7px;
+  font-size: 12.5px; line-height: 1; color: var(--ink-2); white-space: nowrap;
+  opacity: 0; transform: translate3d(-6px, -50%, 0);
+  transition: opacity .45s ease var(--dl), transform .6s var(--ease) var(--dl), color .2s ease 0s;
+}
+#results .rs-board.is-grown .rs-val { opacity: 1; transform: translate3d(0, -50%, 0); }
+#results .rs-row.is-ours .rs-name { color: var(--accent-ink); font-weight: 600; }
+#results .rs-row.is-ours .rs-val { color: var(--ink); font-weight: 600; }
+#results .rs-dag { margin-left: 1px; font-size: .8em; line-height: 0; vertical-align: .35em; color: var(--ink-2); cursor: help; }
+
+/* linked highlight */
+#results .rs-row.is-hl::before { opacity: 1; }
+#results .rs-row.is-hl .rs-fill::after { opacity: 1; }
+#results .rs-row.is-hl .rs-name, #results .rs-row.is-hl .rs-val { color: var(--ink); }
+#results .rs-board.has-hl .rs-row:not(.is-hl) { opacity: .28; }
+#results .rs-board.has-hl .rs-row.is-ours:not(.is-hl) { opacity: .5; }
+
+/* filter: a hidden row folds to zero height at the seam between its visible neighbours (its --slot is the number of
+   visible rows above it) while fading; the rows below slide up into the space and the box shrinks with them */
+#results .rs-board .rs-row.is-out,
+#results .rs-board.has-hl .rs-row.is-out:not(.is-hl) {
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translate3d(0, calc(var(--slot) * var(--rh)), 0) scaleY(0);
+  transition: transform var(--rs-move) var(--ease), opacity .2s ease, visibility 0s linear var(--rs-move);
+}
+/* "N hidden": sits in the axis-tick band under the rows (right-aligned), so it adds no height */
+#results .rs-hidden {
+  position: absolute; top: 100%; right: 0; max-width: calc(100% - var(--rs-name-w) - 44px); margin-top: 11px;
+  display: flex; align-items: center; gap: 6px; height: 12px;
+  font-size: 11px; line-height: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden;
+  opacity: 0; pointer-events: none; transition: opacity .15s ease;
+}
+#results .rs-panel.is-filtered .rs-hidden { opacity: 1; transition: opacity .3s ease .3s; }
+#results .rs-hidden-sw { flex: none; width: 12px; height: 8px; border-radius: 0 2px 2px 0; background: var(--base-pre); }
+
+/* ───────── 3 · radar + efficiency ───────── */
+#results .rs-pair {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch;
+  gap: clamp(16px, 2vw, 24px); margin-top: clamp(16px, 2vw, 24px);
+}
+#results .rs-pair > .card { display: flex; flex-direction: column; padding: clamp(18px, 2.4vw, 32px); }
+#results .rs-pair.is-measuring { align-items: start; }
+
+/* radar model selection: two presets (same .seg as the leaderboard filter) + a fixed-width "Custom" tag that only
+   fades in when the chips match neither preset (its slot is always reserved, so nothing moves) */
+#results .rs-rctl { display: flex; align-items: center; gap: 10px; min-width: 0; margin-top: 16px; }
+#results .rs-preset { flex: none; }
+#results .rs-custom {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 72px; height: 26px; border-radius: var(--r-xs); border: 1px dashed var(--line-2);
+  font-size: 12px; font-weight: 550; line-height: 1; color: var(--ink-2); white-space: nowrap;
+  opacity: 0; visibility: hidden; transform: translateX(-4px);
+  transition: opacity .2s ease, transform .3s var(--ease), visibility 0s linear .3s;
+}
+#results .rs-custom.is-on { opacity: 1; visibility: visible; transform: none; transition: opacity .2s ease, transform .3s var(--ease), visibility 0s; }
+/* narrow cards: the presets take their short labels where the long ones and the tag do not fit; where even those do
+   not fit (phones under about 370 px) the tag is left out, and neither preset being pressed says the same thing */
+#results .rs-rctl { container: rs-rctl / inline-size; }
+@container rs-rctl (max-width: 401px) {
+  #results .rs-preset .rs-fl { display: none; }
+  #results .rs-preset .rs-fs { display: inline; }
+}
+@container rs-rctl (max-width: 297px) {
+  #results .rs-custom { display: none; }
+}
+#results .rs-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+/* the group separator is a forced line break: each group (no pretraining / pretrained) gets its own line, and the
+   empty line adds one more 6 px gap, so the two groups sit 12 px apart. Where a group would wrap anyway (the
+   narrowest phones), results.js drops the break (is-flow) so the legend takes no extra line. */
+#results .rs-chip-sep { display: block; flex: 0 0 100%; height: 0; }
+#results .rs-chip-sep.is-flow { display: none; }
+#results .rs-chip {
+  display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px 0 10px;
+  border-radius: var(--r-sm); border: 1px solid var(--line); background: transparent;
+  font-size: 12.5px; font-weight: 500; line-height: 1; color: var(--ink-2); white-space: nowrap; cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  #results button.rs-chip:hover { color: var(--ink); border-color: var(--line-2); }
+}
+#results .rs-chip[aria-pressed="true"] { color: var(--ink); background: var(--paper); border-color: var(--line-2); box-shadow: 0 1px 2px rgba(20, 16, 40, .06); }
+#results .rs-chip.is-hl { border-color: var(--ink-2); }
+#results .rs-chip .rs-sw { transition: opacity .2s ease; }
+/* unpressed: the text and border show the off state; the swatch stays legible (the pale amber dashes vanish below .6) */
+#results .rs-chip[aria-pressed="false"] .rs-sw { opacity: .6; }
+#results .rs-chip-ours { cursor: default; color: var(--accent-ink); background: var(--accent-soft); border-color: transparent; font-weight: 550; }
+#results .rs-sw { width: 22px; height: 10px; flex: none; overflow: visible; stroke-width: 2.2; stroke-linecap: round; fill: none; }
+#results .rs-sw-ours {
+  display: inline-block; flex: none; width: 14px; height: 10px; border-radius: 3px;
+  background: rgba(189, 178, 226, .55); box-shadow: inset 0 0 0 1.6px var(--accent);
+}
+
+#results .rs-radar-box, #results .rs-eff-box { position: relative; width: 100%; }
+#results .rs-radar-box { flex: 1 0 auto; display: flex; align-items: center; margin: 6px 0 14px; }
+#results .rs-radar, #results .rs-eff { display: block; margin: 0 auto; overflow: visible; max-width: 100%; }
+#results .rs-radar { touch-action: pan-y; border-radius: var(--r-md); }
+#results .rs-radar:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+#results .rs-radar:focus:not(:focus-visible),
+#results [tabindex]:focus:not(:focus-visible) { outline: none; }
+#results .rs-radar * { pointer-events: none; }
+#results .rs-radar .rs-hit { pointer-events: all; }
+#results .rs-r-bg { fill: rgba(150, 138, 201, .05); }
+#results .rs-r-ring { fill: none; stroke: var(--line); stroke-width: 1; }
+#results .rs-r-ring.is-outer { stroke: var(--line-2); }
+#results .rs-r-spoke { stroke: var(--line); stroke-width: 1; transition: stroke .2s ease; }
+#results .rs-r-spoke.is-on { stroke: var(--accent); }
+#results .rs-r-wedge { fill: rgba(150, 138, 201, .12); opacity: 0; transition: opacity .25s ease; }
+#results .rs-r-wedge.is-on { opacity: 1; }
+#results .rs-prism, #results .rs-poly { transform-box: view-box; }
+#results .rs-prism { opacity: 0; transform: scale(.25); transition: opacity .5s ease, transform 1.1s var(--ease); }
+#results .rs-radar.is-drawn .rs-prism { opacity: 1; transform: none; }
+#results .rs-prism-area {
+  fill: rgba(189, 178, 226, .42); stroke: var(--accent); stroke-width: 2; stroke-linejoin: round;
+  transition: fill .25s ease, stroke-width .2s ease;
+}
+#results .rs-prism-dot {
+  fill: var(--accent); stroke: var(--paper); stroke-width: 1.5;
+  transform-box: fill-box; transform-origin: center; transition: transform .3s var(--ease);
+}
+#results .rs-prism-dot.is-on { transform: scale(1.55); }
+#results .rs-radar.has-hl .rs-prism:not(.is-hl) .rs-prism-area { fill: rgba(189, 178, 226, .2); }
+#results .rs-prism.is-hl .rs-prism-area { fill: rgba(189, 178, 226, .56); stroke-width: 2.8; }
+#results .rs-poly { opacity: 0; transform: scale(.86); transition: opacity .35s ease, transform .6s var(--ease); }
+#results .rs-radar.is-drawn .rs-poly.is-on { opacity: 1; transform: none; transition-delay: .25s; }
+#results .rs-radar.is-drawn.has-hl .rs-poly.is-on:not(.is-hl) { opacity: .16; transition-delay: 0s; }
+#results .rs-radar.is-drawn .rs-poly.is-hl { transition-delay: 0s; }
+#results .rs-poly-line { fill: none; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; transition: stroke .2s ease, stroke-width .2s ease; }
+#results .rs-poly-dot { transition: fill .2s ease; }
+#results .rs-poly.is-hl .rs-poly-line { stroke-width: 2.8; stroke-dasharray: none; }
+#results .rs-poly.is-hl .rs-poly-dot { r: 3.4; }
+#results .rs-r-name { fill: var(--ink-2); font-weight: 600; transition: fill .2s ease; }
+#results .rs-r-val { fill: var(--accent-ink); font-weight: 550; font-variant-numeric: tabular-nums; }
+#results .rs-r-lab.is-on .rs-r-name { fill: var(--ink); }
+#results .rs-r-ul { fill: var(--accent); opacity: 0; transform: scaleX(.2); transition: opacity .2s ease, transform .35s var(--ease); }
+#results .rs-r-lab.is-on .rs-r-ul { opacity: 1; transform: none; }
+
+#results .rs-info {
+  margin-top: auto; height: 118px; padding: 12px 16px; border-radius: var(--r-md); background: var(--mist);
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 3px; overflow: hidden;
+  overflow-anchor: none;
+  font-size: 12.5px; line-height: 20px; color: var(--ink-2);
+}
+#results .rs-info-1 { display: flex; align-items: center; gap: 12px; height: 20px; flex: none; min-width: 0; }
+#results .rs-i1-main { flex: 1 1 auto; min-width: 0; height: 20px; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; }
+#results .rs-i1-n { flex: 0 1 auto; min-width: 0; max-width: 100%; height: 20px; display: flex; align-items: center; gap: 7px; }
+#results .rs-i1-n > b { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#results .rs-i1-n .rs-sw, #results .rs-i1-n .rs-sw-ours { flex: none; }
+#results .rs-info-1 b { color: var(--ink); font-weight: 650; }
+#results .rs-info-m { flex: none; white-space: nowrap; color: var(--ink-2); font-weight: 400; }
+#results .rs-info-2 {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); grid-auto-rows: 20px;
+  gap: 3px 10px; max-height: 72px; overflow: hidden; flex: none;
+}
+/* the per-axis readout's layout is set from the width only (results.js fitInfo), so every state shares the box height:
+   2 + 3 stacked cells (118 px box), or on the narrowest strips two columns and a third row (is-tall) */
+#results .rs-info.is-tall { height: 114px; }
+#results .rs-info.is-tall .rs-info-2 { max-height: 66px; }
+#results .rs-iv-ax .rs-iv-n { color: var(--ink-2); }
+#results .rs-iv-ax.is-ours b { color: var(--accent-ink); }
+#results .rs-iv-ax b.is-nr { color: var(--ink-3); font-weight: 500; }
+#results .rs-iv { display: flex; align-items: center; gap: 5px; min-width: 0; white-space: nowrap; }
+#results .rs-iv .rs-sw { width: 16px; }
+#results .rs-info-2 .rs-iv { gap: 4px; font-size: 12px; }
+#results .rs-info-2 .rs-iv .rs-sw { width: 14px; }
+#results .rs-info-2 .rs-iv b { padding-left: 3px; }
+/* the per-axis readout (2 + 3, like the board): hairlines between the cells of a line, so each name sits with its own
+   number; is-r0 / is-r1 mark the first / last cell of a line */
+#results .rs-info-2[data-cols] { column-gap: 0; }
+#results .rs-info-2[data-cols] .rs-iv { padding: 0 14px; border-left: 1px solid var(--line-2); }
+#results .rs-info-2[data-cols] .rs-iv.is-r0 { padding-left: 0; border-left: 0; }
+#results .rs-info-2[data-cols] .rs-iv.is-r1 { padding-right: 0; }
+#results .rs-info-2[data-lay="stack"] { grid-auto-rows: auto; row-gap: 5px; }
+#results .rs-info-2[data-lay="stack"] .rs-iv { flex-direction: column; align-items: flex-start; gap: 0; padding: 0 10px; }
+#results .rs-info-2[data-lay="stack"] .rs-iv.is-r0 { padding-left: 0; }
+#results .rs-info-2[data-lay="stack"] .rs-iv.is-r1 { padding-right: 0; }
+#results .rs-info-2[data-lay="stack"] .rs-iv-n { max-width: 100%; font-size: 11.5px; line-height: 16px; }
+#results .rs-info-2[data-lay="stack"] .rs-iv b { margin-left: 0; padding-left: 0; font-size: 12.5px; line-height: 17px; }
+@media (max-width: 639px) {
+  #results .rs-info-2[data-lay="stack"] .rs-iv { padding: 0 8px; }
+  #results .rs-info-2[data-lay="stack"] .rs-iv-n { font-size: 11px; }
+}
+#results .rs-info-2.is-compact .rs-sw { display: none; }
+#results .rs-iv .rs-sw-ours { width: 12px; height: 9px; }
+#results .rs-iv-n { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#results .rs-iv b { margin-left: auto; padding-left: 4px; color: var(--ink); font-weight: 600; }
+#results .rs-info-1 .rs-iv { flex: none; gap: 6px; }
+#results .rs-iv.is-ours, #results .rs-iv.is-ours b { color: var(--accent-ink); }
+#results .rs-iv.is-hl, #results .rs-iv.is-hl .rs-iv-n { color: var(--ink); }
+#results .rs-iv-more { color: var(--ink-2); }
+
+#results .rs-eff-box { margin: 12px 0 6px; }
+#results .rs-e-gl { stroke: var(--line); stroke-width: 1; }
+#results .rs-e-axis { stroke: var(--line-2); stroke-width: 1; }
+#results .rs-e-tick { fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+#results .rs-e-title { fill: var(--ink-2); font-weight: 500; }
+#results .rs-e-legc { fill: rgba(139, 139, 149, .13); stroke: #a6a6b1; stroke-width: 1; }
+#results .rs-e-legd { fill: #8b8b95; }
+#results .rs-e-legsep { stroke: var(--line); stroke-width: 1; }
+#results .rs-e-legbox { fill: rgba(255, 255, 255, .92); stroke: var(--line); stroke-width: 1; }
+#results .rs-e-legtk { stroke: var(--line-2); stroke-width: 1; }
+#results .rs-e-legt { fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+#results .rs-e-legh { fill: var(--ink-2); font-weight: 550; }
+#results .rs-eff .rs-e-labs, #results .rs-eff .rs-e-grid, #results .rs-eff .rs-e-leg { pointer-events: none; }
+#results .rs-bub { cursor: pointer; outline: none; transition: opacity .25s ease; -webkit-tap-highlight-color: transparent; }
+#results .rs-bub-c {
+  fill: rgba(139, 139, 149, .13); stroke: #a6a6b1; stroke-width: 1;
+  transition: fill .2s ease, stroke .2s ease;
+}
+#results .rs-bub.is-zero .rs-bub-c { fill: #8b8b95; stroke: var(--paper); stroke-width: 2; }
+#results .rs-bub.is-ours .rs-bub-c { fill: var(--accent-light); stroke: var(--paper); stroke-width: 2; }
+#results .rs-bub.is-15b .rs-bub-c { fill: var(--accent); }
+/* PrismWAM's dots sit on top with a white rim, so the one inside Xiaomi's bubble reads as its own mark */
+#results .rs-bub-halo { fill: rgba(150, 138, 201, .22); stroke: rgba(255, 255, 255, .95); stroke-width: 1.5; }
+#results .rs-bub-ring { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; transition: opacity .15s ease; }
+/* only the visible disc and the explicit hit circle take the pointer (the halo / focus ring would enlarge small dots) */
+#results .rs-bub-halo, #results .rs-bub-ring { pointer-events: none; }
+#results .rs-bub:focus-visible .rs-bub-ring { opacity: 1; }
+#results .rs-bub.is-hl.is-big .rs-bub-c { fill: rgba(139, 139, 149, .26); stroke: var(--ink-2); stroke-width: 1.5; }
+#results .rs-bub.is-hl.is-zero:not(.is-ours) .rs-bub-c { fill: var(--ink-2); }
+#results .rs-eff.has-hl .rs-bub:not(.is-hl), #results .rs-eff.has-hl .rs-lab:not(.is-hl) { opacity: .28; }
+/* like the leaderboard, PrismWAM stays visible as the reference while another model is highlighted */
+#results .rs-eff.has-hl .rs-bub.is-ours:not(.is-hl), #results .rs-eff.has-hl .rs-lab.is-ours:not(.is-hl) { opacity: .55; }
+#results .rs-lab { transition: opacity .25s ease; }
+#results .rs-lab-n { fill: var(--ink); font-weight: 600; }
+#results .rs-lab.is-ours .rs-lab-n { fill: var(--accent-ink); }
+#results .rs-lab-h { fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+#results .rs-lab-lead { stroke: var(--ink-3); stroke-width: 1; }
+/* first appearance: bubbles pop, labels follow (fill-mode backwards, so the highlight cascade still applies afterwards) */
+#results .rs-eff:not(.is-drawn) .rs-bub, #results .rs-eff:not(.is-drawn) .rs-lab { opacity: 0; }
+#results .rs-eff.is-drawn:not(.is-settled) .rs-bub-c, #results .rs-eff.is-drawn:not(.is-settled) .rs-bub-halo {
+  transform-box: fill-box; transform-origin: center;
+  animation: rs-pop .9s var(--ease) backwards; animation-delay: calc(var(--k, 0) * 80ms);
+}
+#results .rs-eff.is-drawn:not(.is-settled) .rs-lab { animation: rs-fade .5s ease backwards .55s; }
+@keyframes rs-pop { from { transform: scale(0); } }
+@keyframes rs-fade { from { opacity: 0; } }
+
+#results .rs-takeaway {
+  margin-top: auto; padding: 12px 16px; border-radius: var(--r-md); background: var(--accent-soft);
+  font-size: 12.5px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty;
+}
+#results .rs-takeaway b { color: var(--accent-ink); font-weight: 650; }
+#results .rs-takeaway .num { color: var(--ink); font-weight: 550; }
+#results .rs-takeaway sub { font-size: .72em; line-height: 0; vertical-align: -0.22em; }
+#results .rs-cap { margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+#results .rs-cap .num { font-variant-numeric: tabular-nums; }
+
+/* ───────── model card (inside the shared .tip) ───────── */
+.rs-mc { font-size: 12px; line-height: 1.35; color: var(--ink); }
+.rs-mc-head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rs-mc-sw { flex: none; width: 12px; height: 12px; border-radius: 3px; background: var(--base-hover); }
+.rs-mc-pre .rs-mc-sw { background: repeating-linear-gradient(135deg, #a3a8b3 0 3px, #7f8490 3px 4.5px); }
+.rs-mc-ours .rs-mc-sw { background: var(--accent-light); }
+.rs-mc-15b .rs-mc-sw { background: var(--accent); }
+.rs-mc-name { min-width: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.012em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-mc-name sub { font-size: .72em; line-height: 0; vertical-align: -0.22em; }
+.rs-mc-type {
+  flex: none; margin-left: auto; display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: var(--r-xs);
+  background: var(--mist-2); color: var(--ink-2); font-size: 11px; font-weight: 600;
+}
+.rs-mc-type.is-ours { background: var(--accent-soft); color: var(--accent-ink); }
+.rs-mc-pre-l { margin: 4px 0 10px; font-size: 11px; letter-spacing: -0.003em; color: var(--ink-2); white-space: nowrap; }
+.rs-mc-pre-l b { color: var(--ink); font-weight: 600; }
+.rs-mc-hrs { color: var(--ink-2); white-space: nowrap; }
+/* Benchmark · bar · Score · Rank (fixed tracks inside the fixed-width .tip, so nothing wraps) */
+.rs-mc-grid {
+  display: grid; grid-template-columns: 90px minmax(0, 1fr) 44px 46px;
+  column-gap: 8px; row-gap: 5px; align-items: center;
+}
+.rs-mc-h { align-self: stretch; padding-bottom: 4px; margin-bottom: 1px; border-bottom: 1px solid var(--line); font-size: 10.5px; color: var(--ink-2); white-space: nowrap; }
+.rs-mc-hr { text-align: right; }
+/* one continuous rule under the header row: each cell's border reaches across the column gap */
+.rs-mc-h:not(:nth-child(4)) { margin-right: -8px; padding-right: 8px; }
+.rs-mc-b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); font-size: 11.5px; letter-spacing: -0.005em; }
+.rs-mc-bar { display: block; height: 4px; border-radius: 2px; background: var(--mist-2); overflow: hidden; }
+.rs-mc-bar i { display: block; height: 100%; background: var(--base-hover); transform-origin: 0 50%; }
+.rs-mc-ours .rs-mc-bar i { background: var(--accent-light); }
+.rs-mc-15b .rs-mc-bar i { background: var(--accent); }
+.rs-mc-v { text-align: right; font-weight: 600; white-space: nowrap; }
+.rs-mc-r { text-align: right; color: var(--ink-2); white-space: nowrap; font-size: 11.5px; }
+.rs-mc-r small { font-size: 10px; color: var(--ink-2); }
+.rs-mc-nr { grid-column: 2 / -1; color: var(--ink-2); font-size: 11.5px; white-space: nowrap; }
+.rs-mc-v sup { font-size: .8em; line-height: 0; color: var(--ink-2); }
+.rs-mc-note { margin-top: 8px; font-size: 10.5px; line-height: 1.4; color: var(--ink-2); }
+.rs-mc-foot { margin-top: 9px; padding-top: 7px; border-top: 1px solid var(--line); font-size: 10.5px; line-height: 1.4; color: var(--ink-2); }
+
+/* ───────── responsive ───────── */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  #results { --rs-name-w: 112px; }
+}
+/* narrow panels: compact rank pill ("#1/10"), then the benchmark's short name, so titles never clip */
+@container rs-panel (max-width: 329px) {
+  #results .rs-ph-title { font-size: 14px; padding-right: calc(var(--rs-pill-s) + 8px); }
+  #results .rs-ph-rank { width: var(--rs-pill-s); gap: 5px; padding-left: 9px; }
+  #results .rs-rk-full { display: none; }
+  #results .rs-rk-short { display: inline; }
+}
+/* 2 + 3: once the 3-up row turns compact (its panels' content box < 330 px, i.e. the grid < 1110 px), the wider 2-up
+   row above it follows, so every panel head in the board reads the same way */
+@container rs-grid (max-width: 1109.98px) {
+  #results .rs-grid[data-n="5"] .rs-ph-title { font-size: 14px; padding-right: calc(var(--rs-pill-s) + 8px); }
+  #results .rs-grid[data-n="5"] .rs-ph-rank { width: var(--rs-pill-s); gap: 5px; padding-left: 9px; }
+  #results .rs-grid[data-n="5"] .rs-rk-full { display: none; }
+  #results .rs-grid[data-n="5"] .rs-rk-short { display: inline; }
+}
+@container rs-panel (max-width: 255px) {
+  #results .rs-t-l { display: none; }
+  #results .rs-t-s { display: inline; }
+}
+@media (max-width: 999px) {
+  #results .rs-grid, #results .rs-grid[data-n="5"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* tablets, five benchmarks: 2 + 2 + 1. The headline pair stays under its stat tiles as on desktop, LIBERO and
+     LIBERO-Plus (nine rows each) pair up, LIBERO-Pro spans the last row (no empty cell) */
+  #results .rs-grid[data-n="5"] > .rs-panel:nth-child(n) { grid-column: auto; }
+  #results .rs-grid[data-n="5"] > .rs-panel:last-child { grid-column: 1 / -1; }
+  #results .rs-pair { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 999px) {
+  #results .rs-stat-label { font-size: 16px; }
+  #results .rs-stat-rank { height: 36px; line-height: 36px; padding: 0 14px 0 12px; gap: 7px; font-size: 14.5px; }
+  #results .rs-stat-rank b { font-size: 20px; }
+}
+/* phones: two cards side by side (an odd last card spans the row) */
+@media (max-width: 639px) {
+  #results .rs-stats { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+  #results .rs-stat:nth-child(odd):last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  #results .rs-board-ctl { flex: 1 0 100%; }
+  #results .rs-stat-val { font-size: clamp(32px, 9vw, 40px); }
+}
+@media (max-width: 639px) {
+  #results { --rs-name-w: 104px; --rh: 28px; --rs-val-w: 46px; }
+  #results .rs-ph-rank { font-size: 11.5px; }
+  #results .rs-board-top { align-items: flex-start; }
+  #results .rs-radar-box { width: auto; margin-left: -12px; margin-right: -12px; }
+  /* phones: the panels become a swipeable row (next panel peeking) instead of a 2,000 px stack */
+  #results .rs-grid, #results .rs-grid[data-n] {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 88%; gap: 10px;
+    margin: 0 calc(-1 * var(--rs-bpad)); padding: 2px var(--rs-bpad) 4px;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--rs-bpad); scrollbar-width: none;
+  }
+  #results .rs-grid::-webkit-scrollbar { display: none; }
+  #results .rs-grid[data-n] > .rs-panel:nth-child(n) { grid-column: auto; }
+  #results .rs-panel { scroll-snap-align: start; padding: 12px 12px 4px; box-shadow: 0 0 0 1px var(--line); }
+  #results .rs-panel.is-axis { box-shadow: 0 0 0 1px var(--line-2); }
+  #results .rs-rows { margin-bottom: 22px; }
+  #results .rs-dots { display: flex; justify-content: center; gap: 0; margin: 8px 0 -6px; }
+  #results .rs-dot {
+    display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
+    background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  #results .rs-dot i {
+    display: block; width: 7px; height: 7px; border-radius: 4px; background: var(--line-2);
+    transition: background-color .2s ease, transform .35s var(--ease);
+  }
+  #results .rs-dot[aria-current="true"] i { background: var(--accent); transform: scale(1.35); }
+  /* autoplay: a ring fills around the current dot (5 s), then the next panel comes in */
+  #results .rs-dot { position: relative; }
+  #results .rs-dot-ring { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; transform: rotate(-90deg); opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #results .rs-dot-ring circle { fill: none; stroke-width: 1.5; }
+  #results .rs-ring-bg { stroke: var(--line); }
+  #results .rs-ring-fg { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 50.27; stroke-dashoffset: 50.27; }
+  #results .rs-dots.is-auto .rs-dot[aria-current="true"] .rs-dot-ring { opacity: 1; }
+  #results .rs-dots.is-auto .rs-dot.is-run .rs-ring-fg { animation: rs-ring 5s linear forwards; }
+  /* as specific as the rule that starts the ring (its animation shorthand would reset play-state to running) */
+  #results .rs-dots.is-auto.is-paused .rs-dot.is-run .rs-ring-fg { animation-play-state: paused; }
+  #results .rs-dot:focus-visible { outline-offset: -2px; }
+  #results .rs-filter button, #results .rs-preset button { padding: 0 11px; font-size: 13.5px; }
+  /* compact chips, so the pretrained group (OpenWAM-α, π0.5, Spatial Forcing) fits on one line */
+  #results .rs-chips { column-gap: 5px; }
+  #results .rs-chip { padding: 0 8px 0 7px; gap: 5px; }
+  #results .rs-chip .rs-sw { width: 15px; }
+  #results .rs-key { gap: 4px 12px; }
+  #results .rs-stat { padding: 14px 13px 15px; }
+  #results .rs-stat-label { font-size: 14px; }
+  #results .rs-stat-model { gap: 6px; margin-top: 3px; height: 17px; font-size: 12px; line-height: 17px; }
+  #results .rs-stat-model i { width: 10px; height: 7px; }
+  #results .rs-stat-val { gap: 3px; margin: 9px 0 12px; font-size: clamp(32px, 10.6vw, 42px); }
+  #results .rs-stat-rank { height: 30px; line-height: 30px; padding: 0 9px 0 8px; gap: 5px; border-radius: var(--r-xs); font-size: 11.5px; }
+  #results .rs-stat-rank b { font-size: 15.5px; }
+  #results .rs-info { padding: 11px 14px; }
+  #results .rs-info-1 .rs-info-m { display: none; }
+}
+/* narrow phones (and wide fallback fonts): short filter labels, so nothing clips */
+@media (max-width: 420px) {
+  #results .rs-fl { display: none; }
+  #results .rs-fs { display: inline; }
+}
+@media (max-width: 380px) {
+  #results .rs-stat-label { font-size: 13px; letter-spacing: -0.005em; }
+}
+/* the narrowest phones (under 370 px), where "#2 w/o Agent track" would not fit half the row: one card per row, the
+   rank at the right end of the number's line as on wide cards */
+@media (max-width: 369px) {
+  #results .rs-stats { grid-template-columns: minmax(0, 1fr); }
+  #results .rs-stat-label, #results .rs-stat-model { grid-column: 1 / span 2; }   /* over the number and the rank (an implicit column) */
+  #results .rs-stat-val { grid-column: 1; margin-bottom: 0; }
+  #results .rs-stat-rank { grid-column: 2; grid-row: 3; align-self: center; margin: 9px 0 0 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #results *, #results *::before, #results *::after { transition-delay: 0s !important; animation-delay: 0s !important; }
+}
+
+/* headline numbers link to their benchmark below: the hovered card deepens and takes the same lavender hairline as
+   the panel it lights up (colour and box-shadow only, no shift) */
+@media (hover: hover) and (pointer: fine) {
+  #results .rs-stat.is-hot { background-color: rgba(29, 29, 31, .068); box-shadow: 0 0 0 1.5px var(--accent-light); }
+}
+#results .rs-stat:focus-visible { box-shadow: 0 0 0 2px var(--focus); }
+
+#results .rs-foot { margin-top: 20px; }
+@keyframes rs-ring { to { stroke-dashoffset: 0; } }
+/* the lead's ranks match the overview stat cards: lavender ink, tabular figures */
+#results .lead b { color: var(--ink); font-weight: 600; }
+#results .lead .rs-rk { color: var(--accent-ink); font-weight: 700; font-variant-numeric: tabular-nums; }

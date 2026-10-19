@@ -1,0 +1,679 @@
+/* PrismWAM — E. Real world (#real, sec-dark).
+   Everything is scoped under #real. Only opacity / colour / transform / box-shadow animate, so hover,
+   focus, clip changes and task switches never move the layout.
+   Calm finish: flat surfaces (--night-2 cards with a hairline), small token radii, no decorative gradients or
+   glows; the accent is the desaturated lavender from base.css (--accent-night on dark). */
+
+/* clip, not hidden: hidden would make the section a scroll container and break the pipeline's sticky caption on phones */
+#real { overflow: hidden; overflow: clip; isolation: isolate; }
+
+/* frosted glass for controls laid over the video (badges, play button) */
+#real .real-badges .badge, #real .real-play {
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* ───────── shared bar row ───────── */
+#real .real-bar {
+  display: grid; grid-template-columns: 80px minmax(0, 1fr) 60px 46px; align-items: center;
+  column-gap: 12px; height: 28px;
+}
+#real .real-bar-name { font-size: 13px; color: var(--night-ink-2); white-space: nowrap; }
+#real .real-bar.is-ours .real-bar-name { color: var(--night-ink); font-weight: 600; }
+#real .real-bar-track {
+  position: relative; height: 12px; border-radius: 3px; overflow: hidden;
+  background: rgba(255, 255, 255, .055);
+}
+#real .real-bar-fill {
+  position: absolute; inset: 0; border-radius: 3px; background: rgba(169, 168, 184, .58);
+  transform: translateX(calc((var(--v, 0) - 1) * 100%));
+  transition: transform .9s var(--ease);
+}
+#real .real-bar.is-ours .real-bar-fill { background: var(--accent-night); }
+/* highlight sheen: its own layer, so it never inherits the fill's grow transition or delays */
+#real .real-bar-fill::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; background: #fff; opacity: 0;
+  transition: opacity .25s ease;
+}
+#real .real-bar-val {
+  text-align: right; white-space: nowrap; font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--night-ink-2); font-variant-numeric: tabular-nums;
+}
+#real .real-bar.is-ours .real-bar-val { color: #fff; }
+#real .real-bar-frac { white-space: nowrap; font-size: 12px; color: var(--night-ink-2); font-variant-numeric: tabular-nums; }
+
+/* ───────── page-wide model highlight (PRISM.hl → html[data-hl]) ─────────
+   The real-robot runs are OpenWAM and PrismWAM (5B), so only those two ids respond; any other model leaves
+   this section as it is. Opacity / colour only: nothing moves. */
+#real .real-bar { transition: opacity .25s ease; }
+#real .real-bar-name { transition: color .25s ease; }
+html[data-hl="openwam"] #real .real-bar:not([data-model="openwam"]) { opacity: .5; }
+html[data-hl="prismwam"] #real .real-bar:not([data-model="prismwam"]) { opacity: .34; }
+html[data-hl="openwam"] #real .real-bar[data-model="openwam"] .real-bar-fill::after { opacity: .3; }
+html[data-hl="prismwam"] #real .real-bar[data-model="prismwam"] .real-bar-fill::after { opacity: .16; }
+html[data-hl="openwam"] #real .real-bar[data-model="openwam"] .real-bar-name { color: #fff; }
+
+/* gain readout (pooled card): a big signed number with "points" under it, right-aligned */
+#real .real-delta {
+  display: block; text-align: right; white-space: nowrap; font-size: 13px; line-height: 1.3;
+  color: var(--night-ink-2); font-variant-numeric: tabular-nums;
+}
+#real .real-delta b {
+  display: block; line-height: 1.05; font-weight: 650; letter-spacing: -0.03em; color: var(--accent-night);
+  transition: color .3s;
+}
+#real .real-delta.is-neg b { color: var(--night-ink-2); }
+
+/* ───────── 1. pooled comparison ───────── */
+#real .real-pooled {
+  margin: 0; padding: 20px 28px 2px; border-radius: var(--r-xl);
+  background: var(--night-2); border: 1px solid var(--night-line);
+}
+#real .real-pooled-head { padding-bottom: 14px; border-bottom: 1px solid var(--night-line); }
+#real .real-pooled-title { font-size: 17px; font-weight: 650; letter-spacing: -0.012em; color: var(--night-ink); } /* = .card-title */
+#real .real-prow {
+  display: grid; grid-template-columns: 196px minmax(0, 1fr) 118px; align-items: center; gap: 28px;
+  padding: 18px 0;
+}
+#real .real-prow + .real-prow { border-top: 1px solid var(--night-line); }
+#real .real-prow-label { min-width: 0; }
+#real .real-prow-name { font-size: 17px; font-weight: 600; letter-spacing: -0.012em; color: #fff; white-space: nowrap; }
+#real .real-prow-bars { display: grid; gap: 4px; min-width: 0; }
+#real .real-prow-bars .real-bar { height: 30px; }
+#real .real-prow-bars .real-bar-track { height: 14px; }
+#real .real-prow-bars .real-bar-val { font-size: 17px; }
+#real .real-prow-delta { text-align: right; }
+#real .real-prow-delta .real-delta b { font-size: 32px; }
+/* grow once on view: grey first, then lavender; the gain lands last */
+#real .real-pooled:not(.is-grown) .real-bar-fill { transform: translateX(-100%); }
+#real .real-pooled .real-bar-fill { transition-duration: 1.25s; }
+#real .real-pooled .real-prow:nth-child(1) .real-bar:nth-child(1) .real-bar-fill { transition-delay: .1s; }
+#real .real-pooled .real-prow:nth-child(1) .real-bar:nth-child(2) .real-bar-fill { transition-delay: .22s; }
+#real .real-pooled .real-prow:nth-child(2) .real-bar:nth-child(1) .real-bar-fill { transition-delay: .34s; }
+#real .real-pooled .real-prow:nth-child(2) .real-bar:nth-child(2) .real-bar-fill { transition-delay: .46s; }
+#real .real-pooled .real-bar-val, #real .real-pooled .real-bar-frac { transition: opacity .45s ease .1s; }
+#real .real-pooled:not(.is-grown) .real-bar-val, #real .real-pooled:not(.is-grown) .real-bar-frac { opacity: 0; }
+#real .real-prow-delta { transition: opacity .6s ease, transform .9s var(--ease); }
+#real .real-pooled:not(.is-grown) .real-prow-delta { opacity: 0; transform: translateY(8px); }
+#real .real-pooled .real-prow:nth-child(1) .real-prow-delta { transition-delay: .8s; }
+#real .real-pooled .real-prow:nth-child(2) .real-prow-delta { transition-delay: 1s; }
+
+/* ───────── 2. evidence browser ───────── */
+#real .real-browser { margin-top: clamp(56px, 6.4vw, 84px); }
+/* task tabs: the shared .seg container (radius --r-md, 3px inset) with one sliding indicator whose radius is
+   concentric with it; the active task is marked by a quiet lighter tint and white text, not a bright pill */
+#real .real-tabs-row { display: flex; justify-content: flex-start; margin-bottom: 14px; }
+#real .real-tabs { position: relative; }
+#real .real-tabs button { z-index: 1; border-radius: calc(var(--r-md) - 3px); }
+#real .real-tabs button[aria-selected="true"] { background: transparent; box-shadow: none; color: #fff; }
+#real .real-tabs button:focus-visible { outline-offset: -2px; border-radius: calc(var(--r-md) - 3px); }
+#real .real-tabs-ind {
+  position: absolute; top: 3px; left: 0; height: 34px; width: 0; border-radius: calc(var(--r-md) - 3px);
+  background: rgba(255, 255, 255, .15); box-shadow: 0 1px 2px rgba(0, 0, 0, .28);
+}
+#real .real-tabs.is-ready .real-tabs-ind { transition: transform .5s var(--ease), width .5s var(--ease); }
+
+#real .real-panel {
+  /* the info column widens on short viewports so the whole browser fits on one screen: the media column (a 16:9
+     viewer over a rail of 4:3 thumbnails) is about 3/4 of its width tall, plus about 80px of labels */
+  --info-min: 396px; --info-max: 540px; --gap: 40px;
+  display: grid; gap: var(--gap); padding: 22px;
+  grid-template-columns: minmax(0, 1fr) max(var(--info-min), min(var(--info-max), calc(100% - (100vh - 250px) * 4 / 3 - var(--gap))));
+  position: relative; border-radius: var(--r-xl); border: 1px solid var(--night-line);
+  background: var(--night-2); /* = .card-dark */
+}
+#real .real-media { min-width: 0; }
+
+/* viewer */
+#real .real-viewer {
+  position: relative; aspect-ratio: 16 / 9; border-radius: var(--r-lg); overflow: hidden; isolation: isolate;
+  background: var(--night-3); box-shadow: 0 24px 48px -30px rgba(0, 0, 0, .8);
+}
+#real .real-viewer::after {
+  content: ""; position: absolute; inset: 0; z-index: 6; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+}
+/* the clip (16:9, as the viewer): a tap or click plays / pauses it, the play button does the same for keyboards */
+#real .real-stage {
+  position: absolute; inset: 0; z-index: 0; isolation: isolate; cursor: pointer; touch-action: pan-y;
+}
+#real .real-vid {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover;
+  user-select: none; -webkit-user-select: none; background: transparent;
+  opacity: 0; transition: none; /* clips leave only once covered (real.js releases them) */
+}
+#real .real-vid.is-on { opacity: 1; transition: opacity .6s var(--ease-io); }
+/* the chosen case's poster: up the moment a case is chosen, lifted once its clip shows its first frame */
+#real .real-cover {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; background: var(--night-3);
+  opacity: 0; transition: opacity .4s var(--ease-io);
+}
+#real .real-cover.is-on { opacity: 1; transition: opacity .15s; }
+#real .real-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* the clip is still loading after a moment (or stalls mid-way): a small ring over the picture */
+#real .real-load {
+  position: absolute; left: 50%; top: 50%; z-index: 2; width: 44px; height: 44px; margin: -22px 0 0 -22px; pointer-events: none;
+  border-radius: 50%; background: rgba(10, 10, 20, .5); opacity: 0; transition: opacity .25s; /* the play button's disc */
+}
+#real .real-load::before {
+  content: ""; position: absolute; inset: 11px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .25); border-top-color: #fff;
+}
+#real .real-viewer.is-loading .real-load { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) { #real .real-viewer.is-loading .real-load::before { animation: real-spin .8s linear infinite; } }
+@keyframes real-spin { to { transform: rotate(360deg); } }
+#real .real-scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(9, 11, 18, .5) 0%, rgba(9, 11, 18, 0) 20%, rgba(9, 11, 18, 0) 72%, rgba(9, 11, 18, .66) 100%);
+}
+#real .real-badges {
+  position: absolute; top: 14px; left: 14px; right: 14px; z-index: 3; pointer-events: none;
+  display: flex; flex-wrap: nowrap; gap: 6px;
+}
+#real .real-badges .badge { height: 26px; padding: 0 10px; font-size: 11.5px; background: rgba(10, 10, 20, .5); }
+#real .real-badges .real-badge-mode { flex: 0 1 auto; min-width: 0; }
+/* playback speed: honest, quiet, top right */
+#real .real-badges .real-badge-speed {
+  flex: none; margin-left: auto; padding: 0 8px; font-weight: 600; letter-spacing: .02em;
+  color: rgba(255, 255, 255, .82); font-variant-numeric: tabular-nums;
+}
+#real .real-spd-u { display: none; }
+#real .real-badge-speed.is-uniform .real-spd-pair { display: none; }
+#real .real-badge-speed.is-uniform .real-spd-u { display: inline; }
+#real .real-badge-mode i { flex: none; }
+#real .real-badge-mode > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#real .real-mode-s { display: none; }
+#real .real-badge-mode.is-short .real-mode-l { display: none; }
+#real .real-badge-mode.is-short .real-mode-s { display: block; }
+#real .real-badge-mode i { background: #fff; transition: background-color .3s, box-shadow .3s; }
+#real .real-badge-mode.is-ood i { background: transparent; box-shadow: inset 0 0 0 1.5px #fff; }
+
+#real .real-hud {
+  position: absolute; left: 16px; right: 12px; bottom: 12px; z-index: 3;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; pointer-events: none;
+}
+/* the clip's progress: one thin line (scaled by real.js, never resized) */
+#real .real-steps { display: flex; flex: none; }
+#real .real-step { display: block; width: 120px; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(255, 255, 255, .3); }
+#real .real-step i { display: block; height: 100%; background: #fff; transform-origin: 0 50%; transform: scaleX(0); }
+#real .real-play {
+  position: relative; pointer-events: auto; flex: none; display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  border: 1px solid rgba(255, 255, 255, .16); border-radius: 50%; cursor: pointer; color: #fff;
+  background: rgba(10, 10, 20, .5); /* frosted: see the shared rule at the top */
+  transition: background-color .2s, border-color .2s, transform .2s var(--ease);
+}
+#real .real-play::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; } /* 46px touch target */
+#real .real-play svg { width: 13px; height: 13px; fill: currentColor; }
+#real .real-play .i-play { display: none; }
+#real .real-play.is-paused .i-play { display: block; }
+#real .real-play.is-paused .i-pause { display: none; }
+#real .real-play:active { transform: scale(.94); }
+#real .real-play:focus-visible { outline-offset: 2px; border-radius: 50%; }
+
+/* rail */
+/* rail: the in-distribution case, then up to three out-of-distribution cases. The first column is one thumbnail
+   wide, so all four thumbnails share one width ((rail - group gap - 2 thumb gaps) / 4); a task with two OOD clips
+   leaves the last cell empty, so switching tasks never resizes anything */
+#real .real-rail {
+  --gg: 22px; --tg: 8px;
+  display: grid; grid-template-columns: minmax(0, calc((100% - var(--gg) - 2 * var(--tg)) / 4)) minmax(0, 1fr);
+  gap: var(--gg); margin-top: 16px; container-type: inline-size; container-name: real-rail;
+}
+#real .real-group { min-width: 0; }
+#real .real-group-label {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 8px; white-space: nowrap; overflow: hidden;
+  font-size: 13px; font-weight: 550; color: var(--night-ink-2);
+}
+#real .real-group-label i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--night-ink); }
+#real .real-group-ood .real-group-label i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--night-ink); }
+#real .real-gl-s { display: none; }
+/* narrow rails: "ID" / "OOD" (as in the condition list), so the one-thumbnail column never clips its label */
+@container real-rail (max-width: 520px) {
+  #real .real-gl-l { display: none; }
+  #real .real-gl-s { display: inline; }
+}
+#real .real-group-id .real-thumbs { grid-template-columns: minmax(0, 1fr); }
+#real .real-thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--tg); }
+#real .real-thumb[hidden] { display: none; }
+#real .real-thumb {
+  display: block; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; text-align: left;
+  color: var(--night-ink-2); border-radius: var(--r-sm); -webkit-tap-highlight-color: transparent;
+}
+#real .real-thumb:focus-visible { outline-offset: 3px; border-radius: var(--r-sm); }
+/* thumbnails crop the 16:9 posters to 4:3: a little taller, so the rail balances the info column; the viewer shows the full frame */
+#real .real-thumb-img {
+  position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--r-sm); overflow: hidden;
+  background: var(--night-3); box-shadow: 0 0 0 0 rgba(195, 186, 232, 0), inset 0 0 0 1px rgba(255, 255, 255, .06);
+  transition: box-shadow .3s, transform .4s var(--ease);
+}
+#real .real-thumb-img img {
+  width: 100%; height: 100%; object-fit: cover; opacity: .72; filter: saturate(.9);
+  transition: opacity .3s, filter .3s;
+}
+#real .real-thumb-img img.is-out { opacity: 0; transition-duration: .17s; }
+#real .real-thumb.is-on .real-thumb-img { box-shadow: 0 0 0 2px var(--accent-night), inset 0 0 0 1px rgba(255, 255, 255, .06); }
+#real .real-thumb.is-on .real-thumb-img img:not(.is-out) { opacity: 1; filter: none; }
+#real .real-thumb-label {
+  /* up to two lines (e.g. "Changed Plate Color"); every label keeps two lines' height so switching tasks never shifts the rail */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+  min-height: calc(2 * 1.3em); margin-top: 7px; font-size: 13px; line-height: 1.3; text-wrap: balance;
+  transition: color .25s;
+}
+#real .real-thumb.is-on .real-thumb-label { color: #fff; }
+
+/* info column */
+#real .real-info { display: flex; flex-direction: column; justify-content: space-between; gap: 28px; min-width: 0; padding: 4px 4px 0 0; }
+#real .real-swap { display: grid; }
+#real .real-swap-item {
+  grid-area: 1 / 1; min-width: 0; opacity: 0; visibility: hidden; transform: translate3d(0, 8px, 0);
+  transition: opacity .3s ease, transform .5s var(--ease), visibility 0s linear .3s;
+}
+#real .real-swap-item.is-on {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity .45s ease .1s, transform .7s var(--ease) .1s, visibility 0s;
+}
+#real .real-task-name { font-size: clamp(21px, 1.7vw, 24px); line-height: 1.15; font-weight: 650; letter-spacing: -0.02em; color: #fff; }
+#real .real-task-meta { margin-top: 6px; font-size: 15px; line-height: 1.45; color: var(--night-ink-2); } /* = .real-cond-list dd */
+#real .real-instr { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--night-line); }
+#real .real-label {
+  margin-bottom: 10px; font-size: 13px; font-weight: 600; color: var(--night-ink); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+#real .real-quote { margin: 0; }
+#real .real-cond { margin-top: 22px; }
+#real .real-cond-list { margin: 0; display: grid; gap: 6px; align-content: start; }
+#real .real-cond-list div { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+#real .real-cond-list dt {
+  justify-self: start; padding: 1px 7px; border-radius: var(--r-xs); font-size: 11px; font-weight: 650; letter-spacing: .02em;
+  color: var(--night-ink); background: rgba(255, 255, 255, .08); line-height: 1.5;
+}
+#real .real-cond-list dd { margin: 0; font-size: 15px; line-height: 1.45; color: var(--night-ink-2); text-wrap: balance; }
+/* short blocks wrap balanced, so no line ends in a stub of one or two words */
+#real .real-quote p {
+  position: relative; font-size: 18.5px; line-height: 1.5; letter-spacing: -0.006em; color: var(--night-ink);
+  text-wrap: balance; text-indent: -.42em;
+}
+#real .real-task-bars { padding-top: 18px; border-top: 1px solid var(--night-line); }
+#real .real-tb-head .real-label { margin-bottom: 0; }
+#real .real-tb-group {
+  margin: 6px -12px 0; padding: 7px 12px 6px; border-radius: var(--r-md);
+  background-color: rgba(255, 255, 255, 0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0);
+  transition: background-color .45s ease, box-shadow .45s ease;
+}
+#real .real-tb-group.is-active { background-color: rgba(255, 255, 255, .045); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .075); }
+#real .real-tb-ghead { display: flex; align-items: baseline; margin-bottom: 2px; }
+#real .real-tb-name {
+  display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--night-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#real .real-tb-name i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--night-ink); }
+#real .real-tb-group-ood .real-tb-name i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--night-ink); }
+#real .real-task-bars .real-bar { grid-template-columns: 72px minmax(0, 1fr) 54px 38px; height: 26px; column-gap: 10px; }
+#real .real-task-bars .real-bar-track { height: 9px; }
+#real .real-task-bars .real-bar-name { font-size: 13px; }
+#real .real-task-bars .real-bar-val { font-size: 14px; }
+#real .real-task-bars .real-bar-frac { font-size: 12px; }
+
+/* ───────── hover-capable devices ───────── */
+@media (hover: hover) and (pointer: fine) {
+  #real .real-play:hover { background: rgba(10, 10, 20, .72); border-color: rgba(255, 255, 255, .32); }
+  #real .real-thumb:hover .real-thumb-img { transform: translate3d(0, -2px, 0); }
+  #real .real-thumb:hover .real-thumb-img img { opacity: .85; filter: none; }
+  #real .real-thumb:hover .real-thumb-label { color: var(--night-ink); }
+  #real .real-thumb.is-on:hover .real-thumb-label { color: #fff; }
+}
+#real .real-thumb:focus-visible .real-thumb-img img { opacity: .9; filter: none; }
+
+/* ───────── responsive ───────── */
+/* tall desktop windows: the media column is tall, so the info column gets roomier type and spacing */
+@media (min-width: 1141px) and (min-height: 840px) {
+  #real .real-tb-group { margin-top: 8px; padding: 10px 12px 8px; }
+  #real .real-tb-ghead { margin-bottom: 4px; }
+}
+@media (min-width: 1141px) and (min-height: 890px) {
+  #real .real-quote p { font-size: 19.5px; }
+  #real .real-task-bars .real-bar { height: 29px; }
+  #real .real-task-bars .real-bar-track { height: 10px; }
+}
+@media (max-width: 1140px) {
+  #real .real-panel { --info-min: 356px; --gap: 30px; }
+}
+/* narrow or short windows: tighter rhythm in the info column so the browser still fits one screen */
+@media (max-width: 1140px), (max-height: 799px) {
+  #real .real-info { gap: 20px; }
+  #real .real-task-meta, #real .real-cond-list dd { font-size: 14px; }
+  #real .real-instr { margin-top: 18px; padding-top: 16px; }
+  #real .real-cond { margin-top: 16px; }
+  #real .real-quote p { font-size: 16.5px; }
+  #real .real-task-bars { padding-top: 14px; }
+  #real .real-task-bars .real-bar { height: 25px; }
+}
+/* one column below 1041px: beside the info column a 16:9 viewer would be small (about 300px tall) */
+@media (max-width: 1040px) {
+  #real .real-panel { grid-template-columns: minmax(0, 1fr); --gap: 28px; }
+  #real .real-info {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 36px; align-items: start; padding: 0 4px;
+  }
+  #real .real-task-bars { padding-top: 0; border-top: 0; }
+}
+@media (max-width: 720px) {
+  #real .real-pooled { padding: 16px 16px 4px; border-radius: var(--r-lg); }
+  #real .real-prow { grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; padding: 16px 0 14px; }
+  #real .real-prow-bars { grid-column: 1 / -1; grid-row: 2; }
+  #real .real-prow-delta .real-delta { display: inline-flex; align-items: baseline; gap: 4px; }
+  #real .real-prow-delta .real-delta b { display: inline; font-size: 24px; }
+  #real .real-bar { grid-template-columns: 74px minmax(0, 1fr) 54px 40px; column-gap: 10px; }
+  #real .real-prow-bars .real-bar-val { font-size: 15.5px; }
+
+  #real .real-tabs-row { margin-bottom: 14px; }
+  #real .real-tabs { display: flex; width: 100%; }
+  #real .real-tabs button { flex: 1 1 auto; height: 40px; padding: 0 7px; font-size: 13px; letter-spacing: -0.012em; }
+  #real .real-tabs-ind { height: 40px; }
+  #real .real-panel { padding: 10px; --gap: 22px; border-radius: var(--r-lg); }
+  #real .real-viewer { border-radius: var(--r-md); }
+  #real .real-badges { top: 10px; left: 10px; right: 10px; gap: 5px; }
+  #real .real-badges .badge { height: 24px; padding: 0 9px; font-size: 11px; }
+  #real .real-hud { left: 12px; right: 10px; bottom: 10px; gap: 10px; }
+  #real .real-step { width: 88px; }
+  #real .real-rail { --gg: 14px; --tg: 6px; margin-top: 14px; }
+  #real .real-group-label { margin-bottom: 7px; font-size: 12.5px; }
+  #real .real-thumb-label { margin-top: 6px; font-size: 12px; }
+  #real .real-info { display: flex; flex-direction: column; align-items: stretch; gap: 24px; padding: 0 6px 8px; }
+  #real .real-task-bars { padding-top: 18px; border-top: 1px solid var(--night-line); }
+  #real .real-tb-group { margin: 8px -8px 0; padding: 10px 8px 8px; }
+  #real .real-quote p { font-size: 16.5px; }
+}
+@media (max-width: 480px) {
+  /* phones: "2× · 6× inference" leaves the case badge room */
+  #real .real-speed-x { display: none; }
+}
+@media (max-width: 400px) {
+  #real .real-tabs button { padding: 0 5px; font-size: 12.5px; }
+}
+
+/* ───────── 3. real-robot pipeline (#real-pipe) ─────────
+   An ordered list of stages on a CSS grid: two lanes left to right (RGB above, depth below), PrismWAM's three
+   nodes framed together, then the robot. Below 1001px the grid turns into two columns read top to bottom.
+   real.js draws the wires (SVG overlay) from the node boxes and lights stages in pipeline order; only colour,
+   opacity, box-shadow and clip change, so no box moves; a glowing pulse runs along each wire as its signal travels.
+   Colour code: RGB orange, depth blue, action lavender. The pause control sits quietly at the head's top right. */
+#real .rp { margin-top: clamp(56px, 6.4vw, 84px); }
+#real .rp-card {
+  margin: 0; padding: 0 28px; border-radius: var(--r-xl);
+  background: var(--night-2); border: 1px solid var(--night-line);
+}
+/* card head, as in the pooled card above: a 17px title and one plain sub line */
+#real .rp-head { position: relative; padding: 20px 52px 14px 0; border-bottom: 1px solid var(--night-line); }
+#real .rp-title { font-size: 17px; line-height: 1.3; font-weight: 650; letter-spacing: -0.012em; color: var(--night-ink); } /* = .real-pooled-title */
+#real .rp-lead { max-width: 820px; margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--night-ink-2); text-wrap: pretty; }
+#real .rp-c-warm { --c: var(--warm); }
+#real .rp-c-cool { --c: var(--cool); }
+#real .rp-c-acc { --c: var(--accent-night); }
+#real .rp-c-ink { --c: #fff; }
+
+#real .rp-stage { position: relative; padding: 40px 0 46px; }
+#real .rp-wires { position: absolute; left: 0; top: 0; z-index: 1; overflow: visible; pointer-events: none; }
+#real .rp-flow {
+  position: relative; z-index: 2; margin: 0; padding: 0; list-style: none;
+  display: grid; align-items: center;
+  grid-template-columns: 56px minmax(0, 1.05fr) minmax(0, 1.1fr) minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-areas:
+    "cam rgb .      .       rgbs   goal robot"
+    "cam raw refine refined depths act  cmd";
+  column-gap: clamp(22px, 2.5vw, 30px); row-gap: 50px;
+}
+#real .rp-node[data-k="cam"] { grid-area: cam; }
+#real .rp-node[data-k="rgb"] { grid-area: rgb; }
+#real .rp-node[data-k="raw"] { grid-area: raw; }
+#real .rp-node[data-k="refine"] { grid-area: refine; }
+#real .rp-node[data-k="refined"] { grid-area: refined; }
+#real .rp-node[data-k="rgbs"] { grid-area: rgbs; }
+#real .rp-node[data-k="goal"] { grid-area: goal; }
+#real .rp-node[data-k="depths"] { grid-area: depths; }
+#real .rp-node[data-k="act"] { grid-area: act; }
+#real .rp-node[data-k="cmd"] { grid-area: cmd; }
+#real .rp-node[data-k="robot"] { grid-area: robot; }
+
+/* the PrismWAM frame: positioned by real.js around its nodes; its name sits on the top edge (bottom edge when stacked) */
+#real .rp-model {
+  position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 0; pointer-events: none;
+  border-radius: var(--r-lg); border: 1px solid rgba(205, 196, 245, .22); background: rgba(172, 159, 227, .025);
+  transition: border-color .6s ease;
+}
+#real .rp-model.is-lit { border-color: rgba(205, 196, 245, .48); }
+#real .rp-model-tag {
+  position: absolute; left: 10px; top: 0; transform: translateY(-50%);
+  display: flex; align-items: baseline; gap: 8px; padding: 0 7px; white-space: nowrap;
+  font-size: 12px; line-height: 18px; color: var(--night-ink-2); background: var(--night-2);
+}
+#real .rp-model-tag b { font-size: 13px; font-weight: 650; letter-spacing: -0.005em; color: var(--accent-night); }
+#real .rp-model.is-bottom .rp-model-tag { top: 100%; }
+
+/* nodes */
+#real .rp-node { position: relative; min-width: 0; border-radius: var(--r-md); cursor: default; -webkit-tap-highlight-color: transparent; }
+#real .rp-node:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: var(--r-md); }
+#real .rp-name {
+  display: flex; align-items: center; gap: 7px; font-size: 13.5px; line-height: 1.25; font-weight: 600;
+  letter-spacing: -0.006em; color: var(--night-ink); transition: color .45s ease;
+}
+#real .rp-sub { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.35; color: var(--night-ink-2); text-wrap: balance; }
+/* the stage name wraps as words, not as two flex items */
+#real .rp-node[data-k="refine"] .rp-name { display: block; }
+#real .rp-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+#real .rp-t { font-size: 12px; font-weight: 500; color: var(--night-ink-2); font-variant-numeric: tabular-nums; }
+#real .rp-node.is-lit .rp-name { color: #fff; }
+
+/* boxes */
+#real .rp-box {
+  padding: 11px 12px 12px; background: rgba(255, 255, 255, .03); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09);
+  transition: box-shadow .45s ease, background-color .45s ease;
+}
+#real .rp-box.is-lit { background: rgba(255, 255, 255, .055); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 75%, transparent); }
+#real .rp-goal { background: transparent; box-shadow: none; border: 1px dashed rgba(255, 149, 0, .6); padding: 10px 11px 11px; }
+#real .rp-goal .rp-name { display: block; color: var(--night-ink-2); font-weight: 550; } /* plain text: "t+32" wraps whole */
+#real .rp-goal.is-lit { background: rgba(255, 255, 255, .03); box-shadow: none; border-color: rgba(255, 149, 0, .8); }
+#real .rp-goal.is-lit .rp-name { color: var(--night-ink); }
+
+/* time ticks: observed frames solid, predicted frames fill in as the rollout runs */
+#real .rp-ticks { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; height: 5px; margin-top: 11px; }
+#real .rp-ticks b { border-radius: 1.5px; background: rgba(255, 255, 255, .11); transition: background-color .35s ease, opacity .35s ease; }
+#real .rp-ticks b.is-obs { background: var(--c); opacity: .5; }
+#real .rp-ticks b.is-on { background: var(--c); opacity: 1; }
+#real .rp-comb { gap: 1.5px; }
+#real .rp-comb b { border-radius: 1px; }
+#real .rp-tl {
+  display: flex; justify-content: space-between; margin-top: 5px;
+  font-size: 10.5px; line-height: 1.2; font-weight: 500; letter-spacing: 0; color: var(--night-ink-2); font-variant-numeric: tabular-nums;
+}
+
+/* image tiles: the li is the frame; its caption hangs below it, so wires meet the picture's centre */
+#real .rp-media { border-radius: var(--r-sm); }
+#real .rp-media:focus-visible { border-radius: var(--r-sm); }
+#real .rp-frame { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--r-sm); overflow: hidden; background: var(--night-3); isolation: isolate; }
+#real .rp-frame video, #real .rp-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#real .rp-frame::after {
+  content: ""; position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09); transition: box-shadow .45s ease;
+}
+#real .rp-media.is-lit .rp-frame::after { box-shadow: inset 0 0 0 1.5px var(--c); }
+#real .rp-cap {
+  position: absolute; left: 0; right: 0; top: calc(100% + 9px);
+  display: flex; align-items: center; gap: 7px; white-space: nowrap;
+  font-size: 13px; line-height: 1.2; font-weight: 600; color: var(--night-ink); transition: color .45s ease;
+}
+#real .rp-media.is-lit .rp-cap { color: #fff; }
+/* refined tile: refined clip over a live copy of the raw clip; real.js wipes it in (--w) after fading it out (--o) */
+#real .rp-wipe { --w: 1; --o: 1; --scan: 0; }
+#real .rp-wipe .rp-top { z-index: 1; opacity: var(--o); clip-path: inset(0 calc((1 - var(--w)) * 100%) 0 0); }
+#real .rp-scan {
+  position: absolute; top: 0; bottom: 0; left: calc(var(--w) * 100%); z-index: 2; width: 1.5px; margin-left: -1px;
+  background: rgba(255, 255, 255, .85); opacity: var(--scan); pointer-events: none;
+}
+
+/* camera and robot icons */
+#real .rp-ico {
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--r-md);
+  color: var(--night-ink-2); background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  transition: color .45s ease, box-shadow .45s ease, background-color .45s ease;
+}
+#real .rp-ico svg { width: 26px; height: 26px; }
+#real .rp-cam { justify-self: center; width: 48px; height: 48px; }
+#real .rp-cam .rp-name {
+  position: absolute; left: 50%; top: calc(100% + 9px); width: 84px; margin-left: -42px;
+  justify-content: center; text-align: center; font-size: 12.5px; font-weight: 550; color: var(--night-ink-2);
+}
+#real .rp-cam.is-lit .rp-ico { color: #fff; background: rgba(255, 255, 255, .07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55); }
+#real .rp-cam.is-lit .rp-name { color: var(--night-ink); }
+#real .rp-robot .rp-ico { width: auto; height: auto; place-items: start; background: none; box-shadow: none; margin: -2px 0 6px -1px; }
+#real .rp-robot .rp-ico svg { width: 26px; height: 26px; }
+#real .rp-robot.is-lit .rp-ico { color: var(--accent-night); }
+
+/* pause / play for the loop (WCAG 2.2.2): a quiet round button at the head's top right */
+#real .rp-play {
+  position: absolute; right: -6px; top: 16px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0;
+  border: 1px solid rgba(255, 255, 255, .13); border-radius: 50%; cursor: pointer; color: var(--night-ink-2); background: transparent;
+  transition: color .2s, background-color .2s, border-color .2s, transform .2s var(--ease);
+}
+#real .rp-play[hidden] { display: none; }
+#real .rp-play::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; } /* 46px touch target */
+#real .rp-play svg { width: 11px; height: 11px; fill: currentColor; }
+#real .rp-play .i-play { display: none; }
+#real .rp-play.is-paused .i-play { display: block; margin-left: 1px; }
+#real .rp-play.is-paused .i-pause { display: none; }
+#real .rp-play.is-paused { color: var(--night-ink); border-color: rgba(255, 255, 255, .24); }
+#real .rp-play:active { transform: scale(.94); }
+#real .rp-play:focus-visible { outline-offset: 2px; border-radius: 50%; }
+@media (hover: hover) and (pointer: fine) {
+  #real .rp-play:hover { color: #fff; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .3); }
+}
+
+/* wires (SVG built by real.js) */
+#real .rp-wire { fill: none; stroke-width: 1.5; stroke-opacity: .6; transition: stroke-opacity .5s ease; } /* ≥ 3:1 on --night-2 at rest */
+#real .rp-arrow { stroke: none; fill-opacity: .7; transition: fill-opacity .5s ease; }
+#real .rp-wire.is-hot { stroke-opacity: .85; }
+#real .rp-arrow.is-hot { fill-opacity: .95; }
+#real .rp-wire.is-dash { stroke-dasharray: 3 4; }
+/* the travelling pulse (one <g> per wire, real.js moves it): a soft glow fills the wire behind the head and fades after
+   the signal lands; a wide halo, a bright core and a round glowing head ride on top. Calm: one smooth pass per wire */
+#real .rp-pulse { opacity: 0; }
+#real .rp-pulse path { fill: none; stroke-linecap: round; }
+#real .rp-pulse .p-bloom { stroke-width: 11; stroke-opacity: .11; }
+#real .rp-pulse .p-fill { stroke-width: 4; stroke-opacity: .36; }
+#real .rp-pulse .p-halo { stroke-width: 8; stroke-opacity: .16; }
+#real .rp-pulse .p-tail { stroke-width: 2.75; stroke-opacity: .95; }
+#real .rp-pulse .p-core { stroke-width: 3.5; stroke: color-mix(in srgb, var(--pc) 40%, #fff); }
+#real .rp-pulse .p-head { stroke: none; }
+#real .rp-pulse.w-warm, #real .rp-gr.w-warm { --pc: var(--warm); }
+#real .rp-pulse.w-cool, #real .rp-gr.w-cool { --pc: var(--cool); }
+#real .rp-pulse.w-acc, #real .rp-gr.w-acc { --pc: var(--accent-night); }
+#real .rp-gr stop { stop-color: var(--pc); }  /* the head's radial glow: white-hot centre, wire colour, then clear */
+#real .rp-gr stop.s-0 { stop-color: color-mix(in srgb, var(--pc) 30%, #fff); }
+#real .w-warm { stroke: var(--warm); fill: var(--warm); }
+#real .w-cool { stroke: var(--cool); fill: var(--cool); }
+#real .w-acc { stroke: var(--accent-night); fill: var(--accent-night); }
+#real .rp-wire.w-warm, #real .rp-wire.w-cool, #real .rp-wire.w-acc { fill: none; }
+/* hovering or focusing a stage holds the loop: that stage and its wires light, the rest settles */
+#real .rp-stage.is-inspect .rp-pulse { opacity: 0 !important; }
+/* …and its one line shows in a small tip beside it: real.js puts it in the free space below the stage (above when
+   there is no room) and clamps it inside the diagram, so it overlays the diagram and the card keeps its height */
+#real .rp-tip {
+  position: absolute; left: 0; top: 0; z-index: 5; width: max-content; max-width: min(300px, calc(100% - 8px));
+  padding: 8px 11px 9px; border-radius: var(--r-sm); pointer-events: none;
+  font-size: 12.5px; line-height: 1.45; color: var(--night-ink-2); text-wrap: pretty;
+  background: var(--night-3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 16px 32px -14px rgba(0, 0, 0, .8);
+  opacity: 0; visibility: hidden; transition: opacity .16s ease, visibility 0s linear .16s;
+}
+#real .rp-tip.is-on { opacity: 1; visibility: visible; transition: opacity .16s ease; }
+#real .rp-tip b { font-weight: 600; color: var(--night-ink); }
+#real .rp-tip b::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%;
+  vertical-align: 1px; background: var(--c, #fff);
+}
+/* caret toward the stage (--ax: its centre, set by real.js) */
+#real .rp-tip::before {
+  content: ""; position: absolute; left: var(--ax, 50%); width: 9px; height: 9px; margin-left: -4.5px;
+  background: var(--night-3); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .14); transform: rotate(45deg);
+}
+#real .rp-tip.is-below::before { top: -4.5px; }
+#real .rp-tip.is-above::before { bottom: -4.5px; transform: rotate(225deg); }
+
+/* mid widths: tighter type so the two lanes still fit */
+@media (max-width: 1180px) {
+  #real .rp-card { padding: 0 22px; }
+  #real .rp-flow { column-gap: 20px; }
+  #real .rp-box { padding: 10px 10px 11px; }
+  #real .rp-name { font-size: 13px; }
+  #real .rp-sub { font-size: 12px; }
+  #real .rp-model-tag > span { display: none; }
+}
+@media (max-width: 1100px) {
+  #real .rp-card { padding: 0 20px; }
+  #real .rp-flow {
+    grid-template-columns: 46px minmax(0, .86fr) minmax(0, 1.08fr) minmax(0, .86fr) minmax(0, 1.22fr) minmax(0, 1fr) minmax(0, 1.14fr);
+    column-gap: 18px;
+  }
+}
+
+/* narrow: two columns read top to bottom (RGB left, depth right), camera on top; the last row pairs the joint commands
+   (under the action tower) with the robot beside them, one column each and the same height, joined by a short arrow */
+@media (max-width: 1000px) {
+  #real .rp-stage { padding: 22px 0 24px; }
+  #real .rp-flow {
+    max-width: 460px; margin: 0 auto; padding: 0 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "cam   cam"
+      "rgb   raw"
+      ".     refine"
+      ".     refined"
+      "rgbs  depths"
+      "goal  act"
+      "robot cmd";
+    column-gap: 22px; row-gap: 30px; align-items: center;
+  }
+  #real .rp-cam { width: auto; height: auto; display: flex; align-items: center; gap: 10px; border-radius: var(--r-md); }
+  #real .rp-cam .rp-name { position: static; width: auto; margin: 0; text-align: left; font-size: 13px; }
+  /* a little extra air under the PrismWAM frame, whose name sits on its bottom edge above the robot; a slimmer name
+     strip keeps it clear of the goal box, so it reads as the frame's label, not a caption for the robot */
+  #real .rp-node[data-k="cmd"], #real .rp-robot { margin-top: 6px; }
+  #real .rp-model.is-bottom .rp-model-tag { line-height: 14px; }
+  /* the focus ring hugs the box, so it stays clear of the short arrows between neighbours */
+  #real .rp-node:focus-visible { outline-offset: 1px; }
+  #real .rp-robot { align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+  #real .rp-robot .rp-ico { margin: 0; place-items: center; }
+  #real .rp-robot .rp-ico svg { width: 28px; height: 28px; }
+  #real .rp-model-tag > span { display: inline; }
+  #real .rp-node[data-k="rgbs"], #real .rp-node[data-k="depths"] { align-self: stretch; }
+  /* captions join the flow under their tiles, so a wire leaving a tile starts below its caption */
+  #real .rp-cap { position: static; margin-top: 9px; }
+}
+/* phones: a compact rhythm (tighter rows and boxes, 3:2 tiles, a smaller camera, a slimmer LingBot box) keeps the
+   card about one phone screen tall; no text is set smaller than in the wider layouts, the tick labels a little larger */
+@media (max-width: 720px) {
+  #real .rp-card { padding: 0 14px; border-radius: var(--r-lg); }
+  /* only the title shares its line with the pause button; the lead runs the full width below it */
+  #real .rp-head { padding: 16px 0 12px; }
+  #real .rp-title { padding-right: 44px; }
+  #real .rp-lead { margin-top: 6px; } /* a little air under the button where the first line runs beneath it */
+  #real .rp-play { top: 11px; right: -4px; }
+  #real .rp-stage { padding: 16px 0; }
+  #real .rp-flow { padding: 0 8px; column-gap: 16px; row-gap: 24px; }
+  #real .rp-box { padding: 9px 10px 10px; }
+  #real .rp-goal { padding: 8px 9px 9px; }
+  #real .rp-ticks { margin-top: 8px; }
+  #real .rp-tl { margin-top: 4px; font-size: 12px; }
+  #real .rp-frame { aspect-ratio: 3 / 2; } /* video and canvas cover the frame, so this trims a sliver top and bottom */
+  #real .rp-cap { margin-top: 6px; }
+  #real .rp-cam .rp-ico { width: 40px; height: 40px; }
+  #real .rp-cam .rp-ico svg { width: 23px; height: 23px; }
+  /* "LingBot-Depth" on one line where it fits (390px and up, with the wider gap below) */
+  #real .rp-node[data-k="refine"] { padding: 8px 7px 9px; }
+  #real .rp-node[data-k="refine"] .rp-name { letter-spacing: -0.012em; }
+}
+/* a wider gap where "Joint commands" still fits on one line, so the two sideways arrows (RGB → depth stream,
+   joint commands → robot) show a shaft and the pulse has room to travel */
+@media (min-width: 370px) and (max-width: 720px) {
+  #real .rp-flow { column-gap: 22px; }
+}
+@media (max-width: 420px) {
+  #real .rp-model-tag > span { display: none; }
+}

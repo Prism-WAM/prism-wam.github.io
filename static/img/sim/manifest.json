@@ -1,0 +1,718 @@
+{
+ "description": "RoboTwin 2.0 simulator renders for the PrismWAM 'What changes when a robot acts?' lab: one expert episode seen from the head camera, clean appearance + appearance-only domain-randomisation variants rendered at the identical physical state (same sim step, same robot qpos and object poses).",
+ "task": "grab_roller",
+ "task_description": "Grab Roller: both arms grasp a roller on the table and lift it to z=0.85 m",
+ "seed": 0,
+ "episode": "expert/demo trajectory planned by RoboTwin (curobo) for this seed, replayed for rendering",
+ "roller_model_id": 0,
+ "embodiment": "aloha-agilex",
+ "camera": {
+  "name": "head_camera",
+  "robotwin_type": "Large_D435",
+  "native_resolution": [
+   640,
+   480
+  ],
+  "fovy_deg": 37.0,
+  "intrinsic_cv": [
+   [
+    717.2843627929688,
+    0.0,
+    320.0
+   ],
+   [
+    0.0,
+    717.2843627929688,
+    240.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "extrinsic_cv": [
+   [
+    1.0,
+    0.0,
+    0.0,
+    0.03200000524520874
+   ],
+   [
+    0.0,
+    -0.800000011920929,
+    -0.6000000238418579,
+    0.44999998807907104
+   ],
+   [
+    0.0,
+    0.6000000238418579,
+    -0.800000011920929,
+    1.350000023841858
+   ]
+  ]
+ },
+ "resolution": [
+  640,
+  480
+ ],
+ "image_format": "webp quality 85",
+ "renderer": {
+  "shader": "rt",
+  "spp": 64,
+  "path_depth": 8,
+  "denoiser": "optix"
+ },
+ "num_frames": 32,
+ "episode_frames_total": 93,
+ "episode_unique_states": 90,
+ "robotwin_save_freq_physics_steps": 15,
+ "physics_timestep_s": 0.004,
+ "frame_index_note": "episode_frame_idx = index into the episode as RoboTwin's collector records it (one frame every 15 physics steps, i.e. the hdf5 row); episode_physics_step counts 250 Hz physics steps from the first frame",
+ "frames": [
+  {
+   "t": 0,
+   "episode_frame_idx": 0,
+   "episode_physics_step": 0,
+   "episode_time_s": 0.0,
+   "has_variants": true
+  },
+  {
+   "t": 1,
+   "episode_frame_idx": 3,
+   "episode_physics_step": 31,
+   "episode_time_s": 0.124,
+   "has_variants": true
+  },
+  {
+   "t": 2,
+   "episode_frame_idx": 6,
+   "episode_physics_step": 76,
+   "episode_time_s": 0.304,
+   "has_variants": true
+  },
+  {
+   "t": 3,
+   "episode_frame_idx": 9,
+   "episode_physics_step": 121,
+   "episode_time_s": 0.484,
+   "has_variants": true
+  },
+  {
+   "t": 4,
+   "episode_frame_idx": 11,
+   "episode_physics_step": 151,
+   "episode_time_s": 0.604,
+   "has_variants": true
+  },
+  {
+   "t": 5,
+   "episode_frame_idx": 14,
+   "episode_physics_step": 196,
+   "episode_time_s": 0.784,
+   "has_variants": true
+  },
+  {
+   "t": 6,
+   "episode_frame_idx": 17,
+   "episode_physics_step": 241,
+   "episode_time_s": 0.964,
+   "has_variants": true
+  },
+  {
+   "t": 7,
+   "episode_frame_idx": 20,
+   "episode_physics_step": 286,
+   "episode_time_s": 1.144,
+   "has_variants": true
+  },
+  {
+   "t": 8,
+   "episode_frame_idx": 23,
+   "episode_physics_step": 331,
+   "episode_time_s": 1.324,
+   "has_variants": true
+  },
+  {
+   "t": 9,
+   "episode_frame_idx": 26,
+   "episode_physics_step": 376,
+   "episode_time_s": 1.504,
+   "has_variants": true
+  },
+  {
+   "t": 10,
+   "episode_frame_idx": 29,
+   "episode_physics_step": 421,
+   "episode_time_s": 1.684,
+   "has_variants": true
+  },
+  {
+   "t": 11,
+   "episode_frame_idx": 32,
+   "episode_physics_step": 466,
+   "episode_time_s": 1.864,
+   "has_variants": true
+  },
+  {
+   "t": 12,
+   "episode_frame_idx": 34,
+   "episode_physics_step": 496,
+   "episode_time_s": 1.984,
+   "has_variants": true
+  },
+  {
+   "t": 13,
+   "episode_frame_idx": 37,
+   "episode_physics_step": 541,
+   "episode_time_s": 2.164,
+   "has_variants": true
+  },
+  {
+   "t": 14,
+   "episode_frame_idx": 41,
+   "episode_physics_step": 567,
+   "episode_time_s": 2.268,
+   "has_variants": true
+  },
+  {
+   "t": 15,
+   "episode_frame_idx": 44,
+   "episode_physics_step": 612,
+   "episode_time_s": 2.448,
+   "has_variants": true
+  },
+  {
+   "t": 16,
+   "episode_frame_idx": 47,
+   "episode_physics_step": 657,
+   "episode_time_s": 2.628,
+   "has_variants": true
+  },
+  {
+   "t": 17,
+   "episode_frame_idx": 50,
+   "episode_physics_step": 702,
+   "episode_time_s": 2.808,
+   "has_variants": true
+  },
+  {
+   "t": 18,
+   "episode_frame_idx": 53,
+   "episode_physics_step": 747,
+   "episode_time_s": 2.988,
+   "has_variants": true
+  },
+  {
+   "t": 19,
+   "episode_frame_idx": 57,
+   "episode_physics_step": 775,
+   "episode_time_s": 3.1,
+   "has_variants": true
+  },
+  {
+   "t": 20,
+   "episode_frame_idx": 59,
+   "episode_physics_step": 805,
+   "episode_time_s": 3.22,
+   "has_variants": true
+  },
+  {
+   "t": 21,
+   "episode_frame_idx": 62,
+   "episode_physics_step": 850,
+   "episode_time_s": 3.4,
+   "has_variants": true
+  },
+  {
+   "t": 22,
+   "episode_frame_idx": 65,
+   "episode_physics_step": 895,
+   "episode_time_s": 3.58,
+   "has_variants": true
+  },
+  {
+   "t": 23,
+   "episode_frame_idx": 68,
+   "episode_physics_step": 940,
+   "episode_time_s": 3.76,
+   "has_variants": true
+  },
+  {
+   "t": 24,
+   "episode_frame_idx": 71,
+   "episode_physics_step": 985,
+   "episode_time_s": 3.94,
+   "has_variants": true
+  },
+  {
+   "t": 25,
+   "episode_frame_idx": 74,
+   "episode_physics_step": 1030,
+   "episode_time_s": 4.12,
+   "has_variants": true
+  },
+  {
+   "t": 26,
+   "episode_frame_idx": 78,
+   "episode_physics_step": 1060,
+   "episode_time_s": 4.24,
+   "has_variants": true
+  },
+  {
+   "t": 27,
+   "episode_frame_idx": 81,
+   "episode_physics_step": 1105,
+   "episode_time_s": 4.42,
+   "has_variants": true
+  },
+  {
+   "t": 28,
+   "episode_frame_idx": 83,
+   "episode_physics_step": 1135,
+   "episode_time_s": 4.54,
+   "has_variants": true
+  },
+  {
+   "t": 29,
+   "episode_frame_idx": 86,
+   "episode_physics_step": 1180,
+   "episode_time_s": 4.72,
+   "has_variants": true
+  },
+  {
+   "t": 30,
+   "episode_frame_idx": 89,
+   "episode_physics_step": 1225,
+   "episode_time_s": 4.9,
+   "has_variants": true
+  },
+  {
+   "t": 31,
+   "episode_frame_idx": 92,
+   "episode_physics_step": 1260,
+   "episode_time_s": 5.04,
+   "has_variants": true
+  }
+ ],
+ "files": {
+  "rgb_clean": "rgb_clean_tXX.webp",
+  "depth": "depth_tXX.webp (shared by every variant)",
+  "rgb_variant": "rgb_<variant>_tXX.webp",
+  "depth_variant": "depth_<variant>_tXX.webp only for t in [16] (pixel-identical to depth_tXX.webp)"
+ },
+ "variant_frames": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31
+ ],
+ "variants": [
+  {
+   "name": "light",
+   "description": "random_light only: random RGB colour for the directional light and both point lights; default wall/table",
+   "spec": {
+    "light_colors": [
+     [
+      0.6613,
+      0.3277,
+      0.1954
+     ],
+     [
+      0.863,
+      0.7821,
+      0.1575
+     ],
+     [
+      0.5206,
+      0.964,
+      0.0526
+     ]
+    ]
+   }
+  },
+  {
+   "name": "texture",
+   "description": "random_background only: textured wall and table-top from RoboTwin's texture library; default lights",
+   "spec": {
+    "wall_texture": 114,
+    "table_texture": 653
+   }
+  },
+  {
+   "name": "lighttex",
+   "description": "random_light + random_background: random light colours and textured wall/table-top",
+   "spec": {
+    "light_colors": [
+     [
+      0.1542,
+      0.74,
+      0.2633
+     ],
+     [
+      0.5337,
+      0.0146,
+      0.9187
+     ],
+     [
+      0.9007,
+      0.0334,
+      0.9569
+     ]
+    ],
+    "wall_texture": 900,
+    "table_texture": 969
+   }
+  },
+  {
+   "name": "random1",
+   "description": "fully random appearance (crazy_random_light style): random light colours + random ambient light + textured wall/table-top",
+   "spec": {
+    "light_colors": [
+     [
+      0.2485,
+      0.45,
+      0.4109
+     ],
+     [
+      0.2603,
+      0.8704,
+      0.185
+     ],
+     [
+      0.0197,
+      0.9533,
+      0.6805
+     ]
+    ],
+    "ambient": [
+     0.4922,
+     0.5524,
+     0.5102
+    ],
+    "wall_texture": 553,
+    "table_texture": 295
+   }
+  },
+  {
+   "name": "random2",
+   "description": "fully random appearance, second draw: random light colours + random ambient light + textured wall/table-top",
+   "spec": {
+    "light_colors": [
+     [
+      0.8009,
+      0.4858,
+      0.8271
+     ],
+     [
+      0.6089,
+      0.0679,
+      0.711
+     ],
+     [
+      0.9442,
+      0.1429,
+      0.4076
+     ]
+    ],
+    "ambient": [
+     0.2962,
+     0.5367,
+     0.3672
+    ],
+    "wall_texture": 692,
+    "table_texture": 462
+   }
+  }
+ ],
+ "default_appearance": {
+  "light_colors": [
+   [
+    0.5,
+    0.5,
+    0.5
+   ],
+   [
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.0,
+    1.0,
+    1.0
+   ]
+  ],
+  "ambient": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "wall": "plain colour (1, 0.9, 0.9)",
+  "table": "plain white"
+ },
+ "depth": {
+  "kind": "metric camera-space z (metres) from the renderer's Position G-buffer, i.e. RoboTwin get_depth()/1000",
+  "colormap": "viridis",
+  "near_m": 0.27,
+  "far_m": 1.03,
+  "range_rule": "1st/99th percentile of valid clean depth over the selected frames, rounded outward to 1 cm",
+  "clean_depth_stats_m": {
+   "min": 0.24335366487503052,
+   "p1": 0.27738380402326585,
+   "p99": 1.0203680992126465,
+   "max": 1.0272451639175415
+  },
+  "invalid_pixels": "mapped to far (yellow); none occur in this view (wall/table fill the frame)"
+ },
+ "depth_difference_vs_clean_m": {
+  "light": {
+   "all_rendered_frames": {
+    "n_frames": 93,
+    "max_abs": 0.0,
+    "mean_abs": 0.0,
+    "valid_mask_mismatch_pixels": 0
+   },
+   "selected_frames": {
+    "n_frames": 32,
+    "max_abs": 0.0,
+    "mean_abs": 0.0
+   }
+  },
+  "texture": {
+   "all_rendered_frames": {
+    "n_frames": 93,
+    "max_abs": 0.0,
+    "mean_abs": 0.0,
+    "valid_mask_mismatch_pixels": 0
+   },
+   "selected_frames": {
+    "n_frames": 32,
+    "max_abs": 0.0,
+    "mean_abs": 0.0
+   }
+  },
+  "lighttex": {
+   "all_rendered_frames": {
+    "n_frames": 93,
+    "max_abs": 0.0,
+    "mean_abs": 0.0,
+    "valid_mask_mismatch_pixels": 0
+   },
+   "selected_frames": {
+    "n_frames": 32,
+    "max_abs": 0.0,
+    "mean_abs": 0.0
+   }
+  },
+  "random1": {
+   "all_rendered_frames": {
+    "n_frames": 93,
+    "max_abs": 0.0,
+    "mean_abs": 0.0,
+    "valid_mask_mismatch_pixels": 0
+   },
+   "selected_frames": {
+    "n_frames": 32,
+    "max_abs": 0.0,
+    "mean_abs": 0.0
+   }
+  },
+  "random2": {
+   "all_rendered_frames": {
+    "n_frames": 93,
+    "max_abs": 0.0,
+    "mean_abs": 0.0,
+    "valid_mask_mismatch_pixels": 0
+   },
+   "selected_frames": {
+    "n_frames": 32,
+    "max_abs": 0.0,
+    "mean_abs": 0.0
+   }
+  }
+ },
+ "native_robotwin_crosscheck": [
+  {
+   "variant": "light",
+   "seed": 0,
+   "n_frames": 93,
+   "depth_max_abs_m": 0.0,
+   "depth_mean_abs_m": 0.0,
+   "robot_qpos_max_abs": 0.0,
+   "roller_pose_max_abs": 0.0,
+   "rgb_vs_main_run_uint8": {
+    "0": {
+     "max": 0,
+     "mean": 0.0
+    },
+    "46": {
+     "max": 1,
+     "mean": 0.005628255208333334
+    },
+    "92": {
+     "max": 1,
+     "mean": 0.0060384114583333336
+    }
+   },
+   "method": "separate scene built through RoboTwin's own create_box/create_table texture_id path with the variant's light colours, same seed, same expert trajectory replayed; depth compared with this run's clean depth"
+  },
+  {
+   "variant": "lighttex",
+   "seed": 0,
+   "n_frames": 93,
+   "depth_max_abs_m": 0.0,
+   "depth_mean_abs_m": 0.0,
+   "robot_qpos_max_abs": 0.0,
+   "roller_pose_max_abs": 0.0,
+   "rgb_vs_main_run_uint8": {
+    "0": {
+     "max": 0,
+     "mean": 0.0
+    },
+    "46": {
+     "max": 1,
+     "mean": 0.0054210069444444444
+    },
+    "92": {
+     "max": 1,
+     "mean": 0.006116536458333334
+    }
+   },
+   "method": "separate scene built through RoboTwin's own create_box/create_table texture_id path with the variant's light colours, same seed, same expert trajectory replayed; depth compared with this run's clean depth"
+  },
+  {
+   "variant": "random1",
+   "seed": 0,
+   "n_frames": 93,
+   "depth_max_abs_m": 0.0,
+   "depth_mean_abs_m": 0.0,
+   "robot_qpos_max_abs": 0.0,
+   "roller_pose_max_abs": 0.0,
+   "rgb_vs_main_run_uint8": {
+    "0": {
+     "max": 0,
+     "mean": 0.0
+    },
+    "46": {
+     "max": 1,
+     "mean": 0.006123046875
+    },
+    "92": {
+     "max": 1,
+     "mean": 0.0059483506944444445
+    }
+   },
+   "method": "separate scene built through RoboTwin's own create_box/create_table texture_id path with the variant's light colours, same seed, same expert trajectory replayed; depth compared with this run's clean depth"
+  },
+  {
+   "variant": "random2",
+   "seed": 0,
+   "n_frames": 93,
+   "depth_max_abs_m": 0.0,
+   "depth_mean_abs_m": 0.0,
+   "robot_qpos_max_abs": 0.0,
+   "roller_pose_max_abs": 0.0,
+   "rgb_vs_main_run_uint8": {
+    "0": {
+     "max": 0,
+     "mean": 0.0
+    },
+    "46": {
+     "max": 1,
+     "mean": 0.006657986111111111
+    },
+    "92": {
+     "max": 1,
+     "mean": 0.0065299479166666665
+    }
+   },
+   "method": "separate scene built through RoboTwin's own create_box/create_table texture_id path with the variant's light colours, same seed, same expert trajectory replayed; depth compared with this run's clean depth"
+  },
+  {
+   "variant": "texture",
+   "seed": 0,
+   "n_frames": 93,
+   "depth_max_abs_m": 0.0,
+   "depth_mean_abs_m": 0.0,
+   "robot_qpos_max_abs": 0.0,
+   "roller_pose_max_abs": 0.0,
+   "rgb_vs_main_run_uint8": {
+    "0": {
+     "max": 0,
+     "mean": 0.0
+    },
+    "46": {
+     "max": 1,
+     "mean": 0.006115451388888889
+    },
+    "92": {
+     "max": 1,
+     "mean": 0.005872395833333334
+    }
+   },
+   "method": "separate scene built through RoboTwin's own create_box/create_table texture_id path with the variant's light colours, same seed, same expert trajectory replayed; depth compared with this run's clean depth"
+  }
+ ],
+ "clean_rerender_after_variants": {
+  "rgb_max_abs_uint8": 2,
+  "depth_max_abs_m": 0.0
+ },
+ "excluded_randomisation": {
+  "cluttered_table": "adds distractor objects (changes geometry/depth)",
+  "random_table_height": "moves the table top (changes depth)",
+  "random_head_camera_dis": "moves the camera (changes view and depth)"
+ },
+ "notes": [
+  "Variants are produced in the SAME simulator state: at every RoboTwin save step (every 15 physics steps) the head camera is rendered clean, then once per variant after swapping only render-side state (light colours, ambient light, wall/table-top render materials), then clean again; no physics step happens in between.",
+  "Textures come from RoboTwin's assets/background_texture/unseen (the 'seen' split used by demo_randomized is not downloaded in this checkout); IDs were hand-picked for visible contrast. Light colours use RoboTwin's random_light formula U(0,1)^3 with fixed seeds (see variants.py).",
+  "crazy_random_light normally re-draws colours every frame; here each variant keeps one draw for the whole episode so scrubbing time does not flicker.",
+  "Head camera uses RoboTwin's Large_D435 profile (640x480, fovy 37 deg, same pose as the default 320x240 D435).",
+  "Denoiser: OptiX (sapien's bundled OIDN 2.0.1 reports 'unsupported device type: CUDA' on H20)."
+ ],
+ "total_size_bytes": 3942898,
+ "commands": [
+  "cd /tmp/claude-1000/-mnt-data-users-wanqi-workspace-code-Robot/ee77ab92-197e-432b-ad18-19fb1e5f5d5d/scratchpad/robotwin",
+  "GPU=0 ./run.sh render_episode.py --task grab_roller --seed_start 0 --spp 64 --camera_type Large_D435",
+  "for v in light texture lighttex random1 random2; do GPU=0 ./run.sh crosscheck_native.py --variant $v --ref $PWD/render_out; done",
+  "./run.sh export_assets.py --src /tmp/claude-1000/-mnt-data-users-wanqi-workspace-code-Robot/ee77ab92-197e-432b-ad18-19fb1e5f5d5d/scratchpad/robotwin/render_out --n 32 --sheet /tmp/claude-1000/-mnt-data-users-wanqi-workspace-code-Robot/ee77ab92-197e-432b-ad18-19fb1e5f5d5d/scratchpad/robotwin/contact_sheet.png"
+ ],
+ "scripts": {
+  "launcher": "run.sh (RoboTwin conda env /mnt/data/public_tools/miniconda3/envs/RoboTwin, CUDA13 nvrtc on LD_LIBRARY_PATH, PYTHONDONTWRITEBYTECODE=1)",
+  "render": "render_episode.py",
+  "variants": "variants.py",
+  "config": "rt_common.py",
+  "export": "export_assets.py",
+  "crosscheck": "crosscheck_native.py",
+  "location": "/tmp/claude-1000/-mnt-data-users-wanqi-workspace-code-Robot/ee77ab92-197e-432b-ad18-19fb1e5f5d5d/scratchpad/robotwin/"
+ },
+ "robotwin_repo": "/mnt/data/users/tianyu/workspace/code/RoboTwin (unmodified; base config task_config/demo_clean.yml)"
+}

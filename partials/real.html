@@ -1,0 +1,178 @@
+<!-- ═════════ E. Real world (owner: component E — real.css / real.js) ═════════ -->
+<section class="sec sec-dark" id="real" aria-labelledby="real-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Real Robots</p>
+      <h2 class="h-sec" id="real-title"><span class="claim-num" data-real-claim>+20.0</span> points out of distribution</h2>
+      <p class="lead">Three tasks on physical arms against OpenWAM, same tasks and trial counts. <span class="nowrap">Out-of-distribution</span> trials change the lighting, add distractors, or alter object appearance, placement or the tablecloth.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- 1. Pooled comparison (rows rendered by real.js from PRISM_DATA.REAL_POOLED) -->
+      <figure class="real-pooled reveal" id="real-pooled" aria-labelledby="real-pooled-title">
+        <div class="real-pooled-head">
+          <h3 class="real-pooled-title" id="real-pooled-title">Pooled success, all three tasks</h3>
+        </div>
+        <div class="real-pooled-rows" id="real-pooled-rows"></div>
+      </figure>
+
+      <!-- 2. Real-robot pipeline: animated block diagram. Nodes are an ordered list laid out by CSS grid (two lanes
+           left to right on desktop, two columns top to bottom when narrow); real.js draws the wires, frames the
+           PrismWAM nodes and runs the loop. Facts: paper, Appendix "Views and temporal context" and Sec. 3. -->
+      <div class="rp" id="real-pipe">
+        <figure class="rp-card reveal" aria-labelledby="rp-title">
+          <div class="rp-head">
+            <h3 class="rp-title" id="rp-title">From sensor to action</h3>
+            <p class="rp-lead">One external camera gives RGB and aligned depth; the depth is refined first. Every PrismWAM branch also reads the language instruction and the measured joint state.</p>
+            <button class="rp-play" id="rp-play" type="button" aria-label="Pause animation">
+              <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>
+              <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5z"/></svg>
+            </button>
+          </div>
+          <div class="rp-stage" id="rp-stage">
+            <div class="rp-model" aria-hidden="true"><span class="rp-model-tag"><b>PrismWAM</b><span>Mixture-of-Transformers</span></span></div>
+            <svg class="rp-wires" id="rp-wires" aria-hidden="true" focusable="false"></svg>
+            <ol class="rp-flow" aria-label="Real-robot pipeline, in order">
+              <li class="rp-node rp-cam rp-c-ink" data-k="cam" tabindex="0" aria-labelledby="rp-d-cam" aria-describedby="rp-help">
+                <span class="rp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="2.6"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><path d="M12 16v3.2M9.2 19.5h5.6"/></svg></span>
+                <span class="rp-name">External camera</span>
+              </li>
+              <li class="rp-node rp-media rp-c-warm" data-k="rgb" tabindex="-1" aria-labelledby="rp-d-rgb" aria-describedby="rp-help">
+                <span class="rp-frame"><video class="rp-v" src="static/video/realpipe_rgb.mp4" poster="static/video/realpipe_rgb.jpg" data-still="static/img/realpipe/rgb.jpg" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video></span>
+                <span class="rp-cap"><i class="rp-dot"></i>RGB</span>
+              </li>
+              <li class="rp-node rp-media rp-c-cool" data-k="raw" tabindex="-1" aria-labelledby="rp-d-raw" aria-describedby="rp-help">
+                <span class="rp-frame"><video class="rp-v" id="rp-v-raw" src="static/video/realpipe_raw.mp4" poster="static/video/realpipe_raw.jpg" data-still="static/img/realpipe/depth_raw.jpg" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video></span>
+                <span class="rp-cap"><i class="rp-dot"></i>Raw depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-cool" data-k="refine" tabindex="-1" aria-labelledby="rp-d-refine" aria-describedby="rp-help">
+                <span class="rp-name"><span class="nowrap">LingBot-Depth</span></span>
+                <span class="rp-sub">+ causal temporal smoothing</span>
+              </li>
+              <li class="rp-node rp-media rp-c-cool" data-k="refined" tabindex="-1" aria-labelledby="rp-d-refined" aria-describedby="rp-help">
+                <span class="rp-frame rp-wipe" id="rp-wipe">
+                  <canvas class="rp-under" width="480" height="360" aria-hidden="true"></canvas>
+                  <video class="rp-v rp-top" src="static/video/realpipe_refined.mp4" poster="static/video/realpipe_refined.jpg" data-still="static/img/realpipe/depth_refined.jpg" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"></video>
+                  <i class="rp-scan" aria-hidden="true"></i>
+                </span>
+                <span class="rp-cap"><i class="rp-dot"></i>Refined depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-warm" data-k="rgbs" tabindex="-1" aria-labelledby="rp-d-rgbs" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>RGB stream</span>
+                <span class="rp-sub">Semantic planning</span>
+                <span class="rp-ticks" data-ticks="rgb" aria-hidden="true"><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b><b class="is-obs"></b></span>
+                <span class="rp-tl" aria-hidden="true"><span>t−16</span><span>t</span></span>
+              </li>
+              <li class="rp-node rp-box rp-goal rp-c-warm" data-k="goal" tabindex="-1" aria-labelledby="rp-d-goal" aria-describedby="rp-help">
+                <span class="rp-name">RGB goal <span class="rp-t">t+32</span></span>
+                <span class="rp-sub">Training only</span>
+              </li>
+              <li class="rp-node rp-box rp-c-cool" data-k="depths" tabindex="-1" aria-labelledby="rp-d-depths" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>Depth stream</span>
+                <span class="rp-sub">Physical rollout</span>
+                <span class="rp-ticks" data-ticks="depth" aria-hidden="true"><b class="is-obs"></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></span>
+                <span class="rp-tl" aria-hidden="true"><span>t</span><span>t+32</span></span>
+              </li>
+              <li class="rp-node rp-box rp-c-acc" data-k="act" tabindex="-1" aria-labelledby="rp-d-act" aria-describedby="rp-help">
+                <span class="rp-name"><i class="rp-dot"></i>Action tower</span>
+                <span class="rp-sub">Reads depth</span>
+              </li>
+              <li class="rp-node rp-box rp-c-acc" data-k="cmd" tabindex="-1" aria-labelledby="rp-d-cmd" aria-describedby="rp-help">
+                <span class="rp-name">Joint commands</span>
+                <span class="rp-sub">30 Hz</span>
+                <span class="rp-ticks rp-comb" data-ticks="cmd" aria-hidden="true"></span>
+                <span class="rp-tl" aria-hidden="true"><span>t+1</span><span>t+32</span></span>
+              </li>
+              <li class="rp-node rp-box rp-robot rp-c-acc" data-k="robot" tabindex="-1" aria-labelledby="rp-d-robot" aria-describedby="rp-help">
+                <span class="rp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21h10M8 21v-2.2h5V21"/><circle cx="10.5" cy="16.8" r="1.5"/><path d="M11.5 15.7l3.6-4.1"/><circle cx="16" cy="10.5" r="1.4"/><path d="M14.8 9.8 10 6.8"/><path d="M10.85 5.44 9.15 8.16M10.85 5.44 9.32 4.49M9.15 8.16 7.62 7.21"/></svg></span>
+                <span class="rp-name">Robot arms</span>
+              </li>
+            </ol>
+            <!-- the hovered or focused stage's line, copied in by real.js (screen readers get it as the stage's name) -->
+            <div class="rp-tip" id="rp-tip" aria-hidden="true"></div>
+          </div>
+          <!-- each stage's one line, read by assistive tech as the stage's name (aria-labelledby); shown on screen
+               only in the floating tip above (#rp-tip) while that stage is hovered or focused -->
+          <div class="vh">
+            <span id="rp-d-cam"><b>External camera</b> One external view supplies RGB and aligned depth. No wrist images are used.</span>
+            <span id="rp-d-rgb"><b>RGB</b> Five frames, t−16 to t in steps of 4, resized to 384&thinsp;×&thinsp;320.</span>
+            <span id="rp-d-raw"><b>Raw depth</b> Sensor depth in millimetres, aligned to the RGB view. Black pixels have no reading.</span>
+            <span id="rp-d-refine"><b>LingBot-Depth</b> Refines each raw depth frame; causal temporal smoothing then uses past frames only.</span>
+            <span id="rp-d-refined"><b>Refined depth</b> Stored in millimetres, normalised over 0–1500&thinsp;mm and resized to 384&thinsp;×&thinsp;320. The frame at t is the initial physical state.</span>
+            <span id="rp-d-rgbs"><b>RGB stream</b>, part of PrismWAM. Semantic planning: reads the RGB history to capture task intent.</span>
+            <span id="rp-d-goal"><b>RGB goal</b>, part of PrismWAM. The frame at t+32 is a training target only. Inference generates no future RGB.</span>
+            <span id="rp-d-depths"><b>Depth stream</b>, part of PrismWAM. Physical rollout. Starts from the observed depth at t and predicts t+4, …, t+32, guided by the observed RGB.</span>
+            <span id="rp-d-act"><b>Action tower</b>, part of PrismWAM. Reads the depth rollout and the measured joint state at t.</span>
+            <span id="rp-d-cmd"><b>Joint commands</b> Absolute joint commands for t+1 … t+32 at the native 30&thinsp;Hz.</span>
+            <span id="rp-d-robot"><b>Robot arms</b> Execute the joint commands.</span>
+            <span id="rp-help">Arrow keys move between stages.</span>
+          </div>
+        </figure>
+      </div>
+
+      <!-- 3. Evidence browser: one successful PrismWAM trial per case, played as a gentle tour (real.js).
+           The clips (robot motion at 2×, inference pauses at 6×; 960×540) are listed here so build.py cache-busts their URLs; a <template> is inert,
+           so nothing in it loads until real.js gives the selected case a <video>. -->
+      <div class="real-browser reveal" id="real-browser">
+        <div class="real-tabs-row">
+          <div class="seg real-tabs" id="real-tabs" role="tablist" aria-label="Real-robot task">
+            <span class="real-tabs-ind" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="real-panel" id="real-panel" role="tabpanel">
+          <div class="real-media" id="real-media">
+            <div class="real-viewer" id="real-viewer">
+              <div class="real-stage" id="real-stage"></div>
+              <div class="real-cover" id="real-cover" aria-hidden="true"><img alt="" width="960" height="540" decoding="async" draggable="false"></div>
+              <div class="real-scrim" aria-hidden="true"></div>
+              <span class="real-load" aria-hidden="true"></span>
+              <div class="real-badges" aria-hidden="true">
+                <span class="badge real-badge-mode" id="real-badge-mode"><i></i><span class="real-mode-l"></span><span class="real-mode-s"></span></span>
+                <span class="badge real-badge-speed"><span class="real-spd-pair">2× · 6× <span class="real-speed-x">during </span>inference</span><span class="real-spd-u">2×</span></span>
+              </div>
+              <div class="real-hud">
+                <div class="real-steps" id="real-steps" aria-hidden="true"><span class="real-step"><i></i></span></div>
+                <button class="real-play" id="real-play" type="button" aria-label="Pause video">
+                  <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>
+                  <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5z"/></svg>
+                </button>
+              </div>
+              <template id="real-clips">
+                <video src="static/video/real/plate_id.mp4" poster="static/video/real/plate_id.jpg"></video>
+                <video src="static/video/real/plate_ood_lights.mp4" poster="static/video/real/plate_ood_lights.jpg"></video>
+                <video src="static/video/real/plate_ood_distractors.mp4" poster="static/video/real/plate_ood_distractors.jpg"></video>
+                <video src="static/video/real/plate_ood_platecolor.mp4" poster="static/video/real/plate_ood_platecolor.jpg"></video>
+                <video src="static/video/real/ranking_id.mp4" poster="static/video/real/ranking_id.jpg"></video>
+                <video src="static/video/real/ranking_ood_lights.mp4" poster="static/video/real/ranking_ood_lights.jpg"></video>
+                <video src="static/video/real/ranking_ood_distractors.mp4" poster="static/video/real/ranking_ood_distractors.jpg"></video>
+                <video src="static/video/real/ranking_ood_tablecloth.mp4" poster="static/video/real/ranking_ood_tablecloth.jpg"></video>
+                <video src="static/video/real/microwave_id.mp4" poster="static/video/real/microwave_id.jpg"></video>
+                <video src="static/video/real/microwave_ood_lights.mp4" poster="static/video/real/microwave_ood_lights.jpg"></video>
+                <video src="static/video/real/microwave_ood_distractors.mp4" poster="static/video/real/microwave_ood_distractors.jpg"></video>
+                <video src="static/video/real/microwave_ood_blocks.mp4" poster="static/video/real/microwave_ood_blocks.jpg"></video>
+              </template>
+            </div>
+            <div class="real-rail" id="real-rail"></div>
+          </div>
+
+          <div class="real-info" id="real-info">
+            <div class="real-info-top">
+              <div class="real-swap real-swap-title" id="real-swap-title"></div>
+              <div class="real-instr">
+                <p class="real-label">Instruction</p>
+                <div class="real-swap real-swap-instr" id="real-swap-instr"></div>
+              </div>
+              <div class="real-cond">
+                <p class="real-label">Test conditions</p>
+                <div class="real-swap real-swap-cond" id="real-swap-cond"></div>
+              </div>
+            </div>
+            <div class="real-task-bars" id="real-task-bars"></div>
+          </div>
+        </div>
+        <p class="vh" id="real-live" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</section>

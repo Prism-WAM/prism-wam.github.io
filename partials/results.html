@@ -1,0 +1,83 @@
+<section id="results" class="sec sec-tint" aria-labelledby="rs-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Results</p>
+      <h2 class="h-sec" id="rs-title">Results across five benchmarks, without embodied action pretraining</h2>
+      <p class="lead">PrismWAM ranks <b class="rs-rk">#1</b> overall on <b>RoboTwin C2R</b> and <b class="rs-rk">#2</b> on <b>RoboDojo</b> (w/o Agent track), ahead of models pretrained on thousands of hours of robot actions.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- 1 · headline numbers (values, model tags and ranks are recomputed from PRISM_DATA by results.js) -->
+      <ul class="rs-stats reveal" aria-label="Headline results">
+        <li class="rs-stat" data-stat="c2r">
+          <p class="rs-stat-label"><span class="rs-sl-l">RoboTwin clean → random</span><span class="rs-sl-s">RoboTwin C2R</span></p>
+          <p class="rs-stat-model"><i aria-hidden="true"></i><span>PrismWAM*</span></p>
+          <p class="rs-stat-val"><span class="rs-stat-num num" data-countup>83.67</span><span class="rs-stat-unit">%</span></p>
+          <p class="rs-stat-rank"><b class="num">#1</b><span>overall</span></p>
+        </li>
+        <li class="rs-stat" data-stat="dojo">
+          <p class="rs-stat-label">RoboDojo</p>
+          <p class="rs-stat-model"><i aria-hidden="true"></i><span>PrismWAM*</span></p>
+          <p class="rs-stat-val"><span class="rs-stat-num num" data-countup>36.23</span><span class="rs-stat-unit"></span></p>
+          <p class="rs-stat-rank"><b class="num">#2</b><span>w/o Agent track</span></p>
+        </li>
+      </ul>
+
+      <!-- 2 · linked leaderboard: five small multiples, one global model highlight -->
+      <div class="card rs-board reveal" id="rs-board">
+        <div class="rs-board-top">
+          <h3 class="card-title rs-board-title">Every benchmark, side by side</h3>
+          <div class="rs-board-ctl">
+            <div class="seg rs-filter" role="tablist" aria-label="Which methods to show">
+              <button type="button" role="tab" aria-selected="true" aria-controls="rs-grid" data-filter="all" id="rs-tab-all"><span class="rs-fl">All methods</span><span class="rs-fs">All</span></button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="rs-grid" data-filter="nopre" id="rs-tab-nopre" tabindex="-1"><span class="rs-fl">Without action pretraining</span><span class="rs-fs">No action pretraining</span></button>
+            </div>
+          </div>
+          <ul class="key rs-key" aria-label="Legend">
+            <li><span class="sq k-ours-light"></span>PrismWAM</li>
+            <li><span class="sq k-ours"></span>PrismWAM*</li>
+            <li><span class="sq k-base"></span>Other methods</li>
+            <li><span class="sq k-pre"></span>Extra embodied action pretraining</li>
+          </ul>
+        </div>
+        <div class="rs-grid" id="rs-grid" role="tabpanel" aria-label="Leaderboards for five benchmarks"></div>
+        <div class="rs-dots" id="rs-dots" role="group" aria-label="Choose a benchmark"></div>
+      </div>
+
+      <!-- 3 · radar + efficiency -->
+      <div class="rs-pair">
+        <div class="card rs-radar-card reveal">
+          <div class="card-head">
+            <h3 class="card-title">Five benchmarks at a glance</h3>
+          </div>
+          <div class="rs-rctl">
+            <div class="seg rs-preset" role="group" aria-label="Which models to draw on the radar">
+              <button type="button" aria-pressed="true" data-preset="nopre"><span class="rs-fl">Without action pretraining</span><span class="rs-fs">No action pretraining</span></button>
+              <button type="button" aria-pressed="false" data-preset="all"><span class="rs-fl">All models</span><span class="rs-fs">All</span></button>
+            </div>
+            <span class="rs-custom" id="rs-custom" title="Your own selection of models">Custom</span>
+          </div>
+          <div class="rs-chips" id="rs-chips" role="group" aria-label="Models drawn on the radar, toggle each"></div>
+          <div class="rs-radar-box" id="rs-radar-box">
+            <svg class="rs-radar" id="rs-radar" tabindex="0" role="application" aria-roledescription="radar chart" aria-describedby="rs-info"></svg>
+          </div>
+          <div class="rs-info" id="rs-info" aria-live="off">
+            <p class="rs-info-1"></p>
+            <div class="rs-info-2"></div>
+          </div>
+        </div>
+
+        <div class="card rs-eff-card reveal">
+          <div class="card-head">
+            <h3 class="card-title">RoboDojo score and success rate</h3>
+          </div>
+          <div class="rs-eff-box" id="rs-eff-box">
+            <svg class="rs-eff" id="rs-eff" role="group" tabindex="-1"></svg>
+          </div>
+          <p class="rs-takeaway" id="rs-takeaway"></p>
+        </div>
+      </div>
+      <p class="note rs-foot">* PrismWAM* is the same method with a larger model.</p>
+    </div>
+  </div>
+</section>

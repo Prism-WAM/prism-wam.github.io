@@ -1,0 +1,137 @@
+<!-- ═════════ Method (owner: C) ═════════ -->
+<section class="sec" id="method" aria-labelledby="mt-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">How It Works</p>
+      <h2 class="h-sec" id="mt-title">PrismWAM decouples <span class="ov-w">semantic planning</span> from <span class="ov-c">physical rollout</span></h2>
+      <p class="lead">We instantiate this principle with a Mixture-of-Transformers (MoT) architecture built upon a pretrained video backbone. During training, the semantic planner predicts the target from the initial RGB observation and transfers its task-level knowledge to the physical rollout via attention layers, while the action branch learns to map the predicted physical evolution to continuous actions.</p>
+    </div>
+
+    <div class="sec-body">
+      <!-- Part 1: video-synced stepper -->
+      <div class="mt-tour reveal" id="mt-tour">
+        <div class="mt-stage" id="mt-stage" role="tabpanel" aria-label="Method walkthrough video">
+          <div class="mt-screen">
+            <video class="mt-video" id="mt-video" muted playsinline loop preload="none" poster="static/video/method.jpg"
+                   aria-label="Animated walkthrough of the PrismWAM method: three roles, semantic planning, physical rollout to action, chain attention, training and inference">
+              <source src="static/video/method.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="mt-ctrl">
+            <button class="mt-play" id="mt-play" type="button" aria-label="Play walkthrough" data-state="paused">
+              <svg class="mt-ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.6v10.8a.6.6 0 0 0 .92.5l8.3-5.4a.6.6 0 0 0 0-1L7.42 4.1a.6.6 0 0 0-.92.5Z" fill="currentColor"/></svg>
+              <svg class="mt-ic-pause" viewBox="0 0 20 20" aria-hidden="true"><rect x="5.2" y="4.2" width="3.4" height="11.6" rx="1.1" fill="currentColor"/><rect x="11.4" y="4.2" width="3.4" height="11.6" rx="1.1" fill="currentColor"/></svg>
+            </button>
+            <div class="mt-scrub" id="mt-scrub" role="slider" tabindex="0" aria-label="Seek the walkthrough" aria-valuemin="0" aria-valuemax="34.5" aria-valuenow="0" aria-valuetext="0:00, Three roles">
+              <span class="mt-seg s1" style="flex-grow:9"><i></i></span>
+              <span class="mt-seg s2" style="flex-grow:7.2"><i></i></span>
+              <span class="mt-seg s3" style="flex-grow:4.1"><i></i></span>
+              <span class="mt-seg s4" style="flex-grow:6.7"><i></i></span>
+              <span class="mt-seg s5" style="flex-grow:7.5"><i></i></span>
+              <span class="mt-hover" aria-hidden="true"><span class="mt-hover-lab"></span></span>
+            </div>
+            <span class="mt-clock num" aria-hidden="true"><span class="mt-clock-t">0:00</span> / 0:34</span>
+          </div>
+        </div>
+
+        <div class="mt-steps" id="mt-steps" role="tablist" aria-label="Method walkthrough" aria-orientation="vertical">
+          <span class="mt-glide" aria-hidden="true"></span>
+          <button class="mt-step s1" type="button" role="tab" id="mt-step-1" aria-controls="mt-stage" aria-selected="true" tabindex="0" data-start="0" data-end="9" data-still="8">
+            <span class="mt-num" aria-hidden="true"><span>1</span></span>
+            <span class="mt-title">Three roles</span>
+            <span class="mt-time num" aria-hidden="true">0:00</span>
+            <span class="mt-desc">What to do, how the world responds, how to act.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s2" type="button" role="tab" id="mt-step-2" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="9" data-end="16.2" data-still="15.5">
+            <span class="mt-num" aria-hidden="true"><span>2</span></span>
+            <span class="mt-title">Semantic planning</span>
+            <span class="mt-time num" aria-hidden="true">0:09</span>
+            <span class="mt-desc">The RGB stream learns the goal from a single intended future frame.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s3" type="button" role="tab" id="mt-step-3" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="16.2" data-end="20.3" data-still="19.6">
+            <span class="mt-num" aria-hidden="true"><span>3</span></span>
+            <span class="mt-title">Physical rollout → action</span>
+            <span class="mt-time num" aria-hidden="true">0:16</span>
+            <span class="mt-desc">Depth predicts the dense future trajectory; actions are read out of the physics rollout.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s4" type="button" role="tab" id="mt-step-4" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="20.3" data-end="27" data-still="25.5">
+            <span class="mt-num" aria-hidden="true"><span>4</span></span>
+            <span class="mt-title">Chain attention</span>
+            <span class="mt-time num" aria-hidden="true">0:20</span>
+            <span class="mt-desc">Observed RGB guides depth, depth guides action. Actions never attend to RGB directly.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+          <button class="mt-step s5" type="button" role="tab" id="mt-step-5" aria-controls="mt-stage" aria-selected="false" tabindex="-1" data-start="27" data-end="34.5" data-still="34">
+            <span class="mt-num" aria-hidden="true"><span>5</span></span>
+            <span class="mt-title">Training and inference</span>
+            <span class="mt-time num" aria-hidden="true">0:27</span>
+            <span class="mt-desc">Depth is adapted first, then all streams train jointly. Inference generates no future RGB.</span>
+            <span class="mt-bar" aria-hidden="true"><i></i></span>
+          </button>
+        </div>
+
+        <!-- narrow screens: the active step's sentence, all five stacked in one cell so the height never changes -->
+        <div class="mt-cap" aria-hidden="true">
+          <p class="mt-cap-v is-on">What to do, how the world responds, how to act.</p>
+          <p class="mt-cap-v">The RGB stream learns the goal from a single intended future frame.</p>
+          <p class="mt-cap-v">Depth predicts the dense future trajectory; actions are read out of the physics rollout.</p>
+          <p class="mt-cap-v">Observed RGB guides depth, depth guides action. Actions never attend to RGB directly.</p>
+          <p class="mt-cap-v">Depth is adapted first, then all streams train jointly. Inference generates no future RGB.</p>
+        </div>
+      </div>
+
+      <!-- Part 2: chain attention matrix + architecture figure -->
+      <div class="mt-sub reveal">
+        <h3 class="mt-sub-title">Information flows one way</h3>
+        <p class="lead mt-sub-lead">Each token group reads only what it needs.</p>
+      </div>
+
+      <div class="mt-arch">
+        <div class="card mt-attn reveal" id="mt-attn">
+          <div class="card-head mt-attn-head">
+            <h4 class="card-title">Chain attention</h4>
+            <div class="seg mt-mode" role="tablist" aria-label="Attention mask">
+              <button type="button" role="tab" aria-selected="true" aria-controls="mt-mx" data-mode="train">Training</button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="mt-mx" data-mode="inf" tabindex="-1">Inference</button>
+            </div>
+          </div>
+          <div class="mt-mx-wrap">
+            <div class="mt-mx" id="mt-mx" data-mode="train" role="group" aria-label="Chain attention mask. Observed RGB reads itself; the RGB goal reads observed RGB; current depth reads observed RGB and itself; future depth reads observed RGB and all depth; actions read depth and actions, never RGB."></div>
+          </div>
+        </div>
+
+        <figure class="card mt-fig reveal">
+          <div class="card-head">
+            <h4 class="card-title">Architecture</h4>
+          </div>
+          <!-- The crop shows the architecture panel (left 2409 px of the 3000 px figure, rendered from the paper PDF). Token hotspots are % boxes on that crop:
+               each one frames a token's thumbnail(s) and label, never the shared towers, the task context or the title. -->
+          <div class="mt-crop" id="mt-crop" data-mode="train">
+            <img src="static/img/fig2_architecture_hd.webp" width="3000" height="1192" loading="lazy" decoding="async" data-zoom=""
+                 alt="PrismWAM architecture. A DiT visual tower takes history and current RGB, a noised sparse future RGB frame (training only), current depth and noised future depth; a DiT action tower, coupled by Mixture-of-Transformers, denoises the future action chunk. Both towers receive the encoded task context. The full figure also shows the chain attention masks for training and inference.">
+            <span class="mt-hs m-rgb" data-t="r0" style="left:17.48%;top:62.58%;width:11.43%;height:25.01%"></span>
+            <span class="mt-hs m-rgb" data-t="rF" style="left:28.11%;top:10.78%;width:14.48%;height:21.28%"></span>
+            <span class="mt-hs m-rgb" data-t="rF" style="left:29.44%;top:63.08%;width:10.35%;height:24.52%"></span>
+            <span class="mt-hs m-dep" data-t="d0" style="left:42.45%;top:63.16%;width:10.35%;height:24.44%"></span>
+            <span class="mt-hs m-dep" data-t="d1" style="left:53.49%;top:10.78%;width:10.45%;height:21.23%"></span>
+            <span class="mt-hs m-dep" data-t="d1" style="left:53.29%;top:63.21%;width:10.35%;height:24.39%"></span>
+            <span class="mt-hs m-dep" data-t="dF" style="left:65.4%;top:10.78%;width:10.68%;height:21.17%"></span>
+            <span class="mt-hs m-dep" data-t="dF" style="left:65.04%;top:63.21%;width:10.66%;height:24.39%"></span>
+            <span class="mt-hs m-act" data-t="a" style="left:79.7%;top:11.17%;width:16.61%;height:17.68%"></span>
+            <span class="mt-hs m-act" data-t="a" style="left:79.66%;top:65.43%;width:16.6%;height:21.41%"></span>
+            <span class="mt-to" style="left:28.11%;top:10.78%;width:14.48%;height:27.57%"><span class="mt-to-chip">Training only</span></span>
+            <span class="mt-to" style="left:29.44%;top:53.99%;width:10.35%;height:33.6%"></span>
+            <button class="mt-zoom" id="mt-zoom" type="button" aria-label="Enlarge the architecture figure"></button>
+          </div>
+          <figcaption class="fig-cap">Mixture-of-Transformers: one visual tower for RGB and depth, one action tower.</figcaption>
+        </figure>
+
+        <!-- readout for the matrix rows and the figure hotspots: every state stacked in one cell, so its height is fixed -->
+        <div class="mt-ex reveal" id="mt-ex"></div>
+      </div>
+    </div>
+  </div>
+</section>
