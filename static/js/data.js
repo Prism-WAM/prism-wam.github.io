@@ -68,7 +68,7 @@ window.PRISM_DATA = (function () {
   ];
 
   // Table 1: RoboDojo Precision category, progress score (/100)
-  const DOJO_PRECISION = { "prismwam-15b": 38.44, prismwam: 30.37, openwam: 18.45, "4dwam": 18.08, spatialforcing: 17.32, pi05: 12.4, starvla: 9.9, xwam: 6.72, fastwam: 1.96 };
+  const DOJO_PRECISION = { "prismwam-15b": 39.82, prismwam: 28.70, openwam: 18.45, "4dwam": 18.08, spatialforcing: 17.32, pi05: 12.4, starvla: 9.9, xwam: 6.72, fastwam: 1.96 };
 
   // Table 5: real-world successes / trials
   const REAL = [

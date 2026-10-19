@@ -167,9 +167,6 @@ window.PRISM = (function () {
   }
 
   function initBibCopy() {
-    // cite the page wherever it is hosted: fill the URL from the address bar (no hash or query)
-    const u = $("#bib-url");
-    if (u && /^https?:$/.test(location.protocol)) u.textContent = location.origin + location.pathname;
     const btn = $("#bib-copy"), code = $("#bib-code");
     if (!btn || !code) return;
     btn.addEventListener("click", () => {
