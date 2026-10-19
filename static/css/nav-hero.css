@@ -344,10 +344,15 @@
   .ov-links { gap: 8px; }
   .ov-links .btn { padding: 0 13px; }
 }
-/* phones: Film full width, the four others as an even 2 x 2 grid (never a lone button on the last row) */
+/* narrow two-column widths, and tablets where Film joins the row: tighter buttons keep one row */
+@media (min-width: 760px) and (max-width: 939.98px), (min-width: 1000px) and (max-width: 1099.98px) {
+  .ov-links { gap: 6px; }
+  .ov-links .btn { padding: 0 10px; }
+}
+/* phones: Film and BibTeX full width, the four others as an even 2 x 2 grid (never a lone button on a row) */
 @media (max-width: 759.98px) {
   .ov-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 440px; }
-  .ov-watch { grid-column: 1 / -1; }
+  .ov-watch, .ov-cite { grid-column: 1 / -1; }
 }
 
 .ov-tl { margin-top: 28px; }
