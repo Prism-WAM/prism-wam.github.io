@@ -5,7 +5,7 @@ window.PRISM_DATA = (function () {
 
   // type: "ours" | "VLA" | "WAM"; pre: uses extra embodied action pretraining (hatched in the paper's Fig. 3).
   // pre: null = the paper does not say; preNote then gives what it does say (render it instead of "yes"/"no").
-  // "PrismWAM" is the 5B model; PrismWAM* (the larger model) is reported where available.
+  // "PrismWAM" is the 5B model; PrismWAM* (the exploratory 15B variant) is reported where available.
   const MODELS = {
     "vpp2":         { name: "VPP2", type: "WAM", pre: false, org: "RobotEra", inert: true },  // RoboDojo only; no hover card or linking
     "prismwam-15b": { name: "PrismWAM*", type: "ours", pre: false, hours: 0, hoursLabel: "0 h", ours: true },

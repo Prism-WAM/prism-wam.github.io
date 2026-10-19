@@ -532,7 +532,7 @@
           <p class="rs-takeaway" id="rs-takeaway"></p>
         </div>
       </div>
-      <p class="note rs-foot">* PrismWAM* is the same method with a larger model.</p>
+      <p class="note rs-foot">* PrismWAM* denotes the exploratory 15B variant, which is initialized from WAN-2.1-14B with additional video-only pretraining.</p>
     </div>
   </div>
 </section>
@@ -649,7 +649,7 @@
         </div>
       </div>
 
-      <p class="note rb-note">Each setting is its own model, trained and evaluated with that depth on 50 tasks × 20 episodes per scene. This is a separate run from the 100-episode benchmark in Results (70.57%).</p>
+      <p class="note rb-note">Each setting is its own model, trained and evaluated with that depth. This is a separate run from the benchmark in Results (70.57%).</p>
     </div>
   </div>
 </section>
@@ -751,15 +751,15 @@
                only in the floating tip above (#rp-tip) while that stage is hovered or focused -->
           <div class="vh">
             <span id="rp-d-cam"><b>External camera</b> One external view supplies RGB and aligned depth. No wrist images are used.</span>
-            <span id="rp-d-rgb"><b>RGB</b> Five frames, t−16 to t in steps of 4, resized to 384&thinsp;×&thinsp;320.</span>
+            <span id="rp-d-rgb"><b>RGB</b> Five recent frames up to the current time t.</span>
             <span id="rp-d-raw"><b>Raw depth</b> Sensor depth in millimetres, aligned to the RGB view. Black pixels have no reading.</span>
             <span id="rp-d-refine"><b>LingBot-Depth</b> Refines each raw depth frame; causal temporal smoothing then uses past frames only.</span>
-            <span id="rp-d-refined"><b>Refined depth</b> Stored in millimetres, normalised over 0–1500&thinsp;mm and resized to 384&thinsp;×&thinsp;320. The frame at t is the initial physical state.</span>
+            <span id="rp-d-refined"><b>Refined depth</b> The frame at t is the initial physical state.</span>
             <span id="rp-d-rgbs"><b>RGB stream</b>, part of PrismWAM. Semantic planning: reads the RGB history to capture task intent.</span>
-            <span id="rp-d-goal"><b>RGB goal</b>, part of PrismWAM. The frame at t+32 is a training target only. Inference generates no future RGB.</span>
-            <span id="rp-d-depths"><b>Depth stream</b>, part of PrismWAM. Physical rollout. Starts from the observed depth at t and predicts t+4, …, t+32, guided by the observed RGB.</span>
+            <span id="rp-d-goal"><b>RGB goal</b>, part of PrismWAM. A training target only. Inference generates no future RGB.</span>
+            <span id="rp-d-depths"><b>Depth stream</b>, part of PrismWAM. Physical rollout. Starts from the observed depth and predicts the depth rollout, guided by the observed RGB.</span>
             <span id="rp-d-act"><b>Action tower</b>, part of PrismWAM. Reads the depth rollout and the measured joint state at t.</span>
-            <span id="rp-d-cmd"><b>Joint commands</b> Absolute joint commands for t+1 … t+32 at the native 30&thinsp;Hz.</span>
+            <span id="rp-d-cmd"><b>Joint commands</b> Absolute joint commands for the next 32 steps.</span>
             <span id="rp-d-robot"><b>Robot arms</b> Execute the joint commands.</span>
             <span id="rp-help">Arrow keys move between stages.</span>
           </div>
@@ -895,13 +895,13 @@
   <img alt="">
 </div>
 
-<script src="static/js/data.js?v=29a066a0"></script>
+<script src="static/js/data.js?v=a28d145b"></script>
 <script src="static/js/core.js?v=30a7a32f"></script>
 <script src="static/js/nav-hero.js?v=f7b59f82"></script>
 <script src="static/js/lab.js?v=8a8b106c"></script>
 <script src="static/js/method.js?v=3ffe92d5"></script>
 <script src="static/js/results.js?v=bee4eb63"></script>
 <script src="static/js/robust.js?v=1154c55c"></script>
-<script src="static/js/real.js?v=4e34788d"></script>
+<script src="static/js/real.js?v=bc14f198"></script>
 </body>
 </html>

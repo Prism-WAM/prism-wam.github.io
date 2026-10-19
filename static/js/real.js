@@ -45,7 +45,7 @@
   // Open Microwave: paper, Table 16)
   const INSTR = {
     plate: "Bimanually pick up the flat plate and slot it upright into the rack’s robot-nearest slot.",
-    ranking: "Arrange cubes along the arm’s reach: largest nearest the robot base, medium centered, smallest farthest.",
+    ranking: "Arrange cubes along the arm’s reach: largest farthest from the robot, medium centered, smallest nearest.",
     microwave: "Open the microwave; put the inside basket to microwave’s right; leave door open.",
   };
 
