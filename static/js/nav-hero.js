@@ -339,8 +339,6 @@
 
     // portrait phones: the 16:9 film floats in a tall black screen; once it has played, the hero folds up to the film's
     // own height so the paper title below comes into view. Only ever at the top; otherwise it waits for the return.
-    // the overview link row comes in two colourings while the owner chooses: ?links=fill shows the filled one
-    try { if (new URLSearchParams(location.search).get("links") === "fill") $(".ov-links")?.classList.add("ov-links--fill"); } catch (e) { /* old browser */ }
     const heroEl = $("#top");
     const mqFold = window.matchMedia("(max-aspect-ratio: 6/5) and (max-width: 899.98px)");
     // status-bar tint (see .hero-tint in nav-hero.css): dark while the hero still covers the top of a phone screen

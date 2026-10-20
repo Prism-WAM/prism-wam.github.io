@@ -346,8 +346,7 @@ html.hero-tint body { background: #070a11; }
 .ov-links .btn-line[aria-disabled="true"] { opacity: .5; }
 /* link icons: a line icon at rest (one style for the whole row). On hover the button lifts, takes the
    destination's colour, and the line icon pops into the destination's full mark, which then keeps a small loop
-   going (plus a slow sheen) for as long as the pointer stays. Two colourings: tinted (default) and filled
-   (?links=fill), for the owner to choose. */
+   going (plus a slow sheen) for as long as the pointer stays. */
 .ov-links .btn-line { position: relative; overflow: hidden; isolation: isolate;
   transition: color .25s, background-color .3s, border-color .3s, transform .45s var(--ease), box-shadow .45s var(--ease); }
 .ov-links .btn-line::after { content: ""; position: absolute; inset: -1px; z-index: -1; pointer-events: none; opacity: 0;
@@ -369,13 +368,6 @@ html.hero-tint body { background: #070a11; }
     transform: translateY(-2px); box-shadow: 0 10px 22px -12px var(--glow);
   }
   .ov-links .ov-hf:hover, .ov-links .ov-hf:focus-visible { color: var(--ink); }
-  /* filled: the destination colour fills the whole button */
-  .ov-links--fill .btn-line:hover, .ov-links--fill .btn-line:focus-visible {
-    --shine: rgba(255, 255, 255, .34); color: #fff; background: var(--brand); box-shadow: 0 12px 24px -12px var(--glow);
-  }
-  .ov-links--fill .ov-hf:hover, .ov-links--fill .ov-hf:focus-visible { color: var(--ink); background: #FFD21E; --shine: rgba(255, 255, 255, .55); }
-  .ov-links--fill .ov-paper:hover .cut, .ov-links--fill .ov-paper:focus-visible .cut { fill: var(--brand); }
-  .ov-links--fill .ov-paper:hover .cut-l, .ov-links--fill .ov-paper:focus-visible .cut-l { stroke: var(--brand); }
   .ov-links .btn-line:hover .ic-l, .ov-links .btn-line:focus-visible .ic-l { opacity: 0; transform: scale(.4) rotate(30deg); }
   .ov-links .btn-line:hover .ic-b, .ov-links .btn-line:focus-visible .ic-b { opacity: 1; transform: none; }
 }
