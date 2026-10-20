@@ -344,20 +344,61 @@ html.hero-tint body { background: #070a11; }
 .ov-main { min-width: 0; }
 .ov-links { display: flex; flex-wrap: wrap; gap: 10px; }
 .ov-links .btn-line[aria-disabled="true"] { opacity: .5; }
-/* link icons: a line icon at rest (one style for the whole row); on hover the button takes the destination's colour
-   and the line icon turns into its full mark (arXiv, GitHub, Hugging Face) */
+/* link icons: a line icon at rest (one style for the whole row). On hover the button lifts, takes the
+   destination's colour, and the line icon pops into the destination's full mark, which then keeps a small loop
+   going (plus a slow sheen) for as long as the pointer stays. Two colourings: tinted (default) and filled
+   (?links=fill), for the owner to choose. */
+.ov-links .btn-line { position: relative; overflow: hidden; isolation: isolate;
+  transition: color .25s, background-color .3s, border-color .3s, transform .45s var(--ease), box-shadow .45s var(--ease); }
+.ov-links .btn-line::after { content: ""; position: absolute; inset: -1px; z-index: -1; pointer-events: none; opacity: 0;
+  background: linear-gradient(105deg, transparent 38%, var(--shine) 50%, transparent 62%) 130% 0 / 260% 100% no-repeat; }
 .ov-links .ov-ic { position: relative; flex: none; width: 17px; height: 17px; }
 .ov-links .ov-ic svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .22s, transform .45s var(--ease); }
-.ov-links .ov-ic .ic-b { opacity: 0; transform: scale(.5) rotate(-18deg); }
-.ov-hf .ov-ic .ic-b { width: 120%; height: 120%; inset: -10%; }
+.ov-links .ov-ic .ic-b { opacity: 0; transform: scale(.4) rotate(-30deg); }
+.ov-hf .ov-ic .ic-b { width: 128%; height: 128%; inset: -14%; }
+.ov-paper .cut { fill: #fff; } .ov-paper .cut-l { stroke: #fff; }
+.ov-links .ov-paper, .ov-links .ov-cite { --brand: var(--accent-ink); --tint: var(--accent-soft); --glow: rgba(106, 92, 192, .45); }
+.ov-links .ov-arxiv { --brand: #B31B1B; --tint: rgba(179, 27, 27, .06); --glow: rgba(179, 27, 27, .4); }
+.ov-links .ov-code { --brand: #1F2328; --tint: rgba(31, 35, 40, .05); --glow: rgba(31, 35, 40, .45); }
+.ov-links .ov-hf { --brand: #F5B800; --tint: rgba(255, 210, 30, .2); --glow: rgba(240, 160, 0, .45); }
 @media (hover: hover) and (pointer: fine) {
-  .ov-links .btn-line:hover .ic-l, .ov-links .btn-line:focus-visible .ic-l { opacity: 0; transform: scale(.5) rotate(18deg); }
+  .ov-links .btn-line:hover, .ov-links .btn-line:focus-visible {
+    --shine: color-mix(in srgb, var(--brand) 16%, transparent);
+    color: var(--brand); border-color: var(--brand); background: var(--tint);
+    transform: translateY(-2px); box-shadow: 0 10px 22px -12px var(--glow);
+  }
+  .ov-links .ov-hf:hover, .ov-links .ov-hf:focus-visible { color: var(--ink); }
+  /* filled: the destination colour fills the whole button */
+  .ov-links--fill .btn-line:hover, .ov-links--fill .btn-line:focus-visible {
+    --shine: rgba(255, 255, 255, .34); color: #fff; background: var(--brand); box-shadow: 0 12px 24px -12px var(--glow);
+  }
+  .ov-links--fill .ov-hf:hover, .ov-links--fill .ov-hf:focus-visible { color: var(--ink); background: #FFD21E; --shine: rgba(255, 255, 255, .55); }
+  .ov-links--fill .ov-paper:hover .cut, .ov-links--fill .ov-paper:focus-visible .cut { fill: var(--brand); }
+  .ov-links--fill .ov-paper:hover .cut-l, .ov-links--fill .ov-paper:focus-visible .cut-l { stroke: var(--brand); }
+  .ov-links .btn-line:hover .ic-l, .ov-links .btn-line:focus-visible .ic-l { opacity: 0; transform: scale(.4) rotate(30deg); }
   .ov-links .btn-line:hover .ic-b, .ov-links .btn-line:focus-visible .ic-b { opacity: 1; transform: none; }
-  .ov-links .ov-paper:hover, .ov-links .ov-cite:hover { color: var(--accent-ink); border-color: var(--accent-ink); background: var(--accent-soft); }
-  .ov-links .ov-arxiv:hover { color: #B31B1B; border-color: #B31B1B; background: rgba(179, 27, 27, .06); }
-  .ov-links .ov-code:hover { color: #1F2328; border-color: #1F2328; background: rgba(31, 35, 40, .05); }
-  .ov-links .ov-hf:hover { color: #1F2328; border-color: #F5B800; background: rgba(255, 210, 30, .2); }
 }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .ov-links .btn-line:hover::after, .ov-links .btn-line:focus-visible::after { opacity: 1; animation: ov-shine 2.4s .3s var(--ease-io) infinite; }
+  .ov-links .btn-line:hover .ic-b, .ov-links .btn-line:focus-visible .ic-b { animation: ov-pop .6s var(--ease) both, var(--idle) var(--idle-t, 1.6s) .6s ease-in-out infinite; }
+  .ov-links .ov-paper { --idle: ov-float; }
+  .ov-links .ov-arxiv { --idle: ov-sway; --idle-t: 1.8s; }
+  .ov-links .ov-code { --idle: ov-wave; --idle-t: 2s; }
+  .ov-links .ov-hf { --idle: ov-hug; --idle-t: 1.2s; }
+  .ov-links .ov-cite { --idle: ov-none; }
+  .ov-links .ov-cite:hover .br-l, .ov-links .ov-cite:focus-visible .br-l { animation: ov-br-l 1.4s .6s ease-in-out infinite; }
+  .ov-links .ov-cite:hover .br-r, .ov-links .ov-cite:focus-visible .br-r { animation: ov-br-r 1.4s .6s ease-in-out infinite; }
+}
+@keyframes ov-shine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+@keyframes ov-pop { 0% { opacity: 0; transform: scale(.3) rotate(-35deg); } 55% { opacity: 1; transform: scale(1.24) rotate(8deg); }
+  80% { transform: scale(.94) rotate(-3deg); } 100% { opacity: 1; transform: none; } }
+@keyframes ov-float { 0%, 100% { transform: none; } 50% { transform: translateY(-2px) rotate(-5deg); } }
+@keyframes ov-sway { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+@keyframes ov-wave { 0%, 60%, 100% { transform: none; } 15% { transform: rotate(-12deg) translateY(-1px); } 30% { transform: rotate(10deg); } 45% { transform: rotate(-5deg); } }
+@keyframes ov-hug { 0%, 100% { transform: none; } 30% { transform: scale(1.16, .9); } 48% { transform: scale(.94, 1.08) translateY(-1.5px); } 65% { transform: none; } }
+@keyframes ov-none { to { transform: none; } }
+@keyframes ov-br-l { 0%, 100% { transform: none; } 50% { transform: translateX(-1.6px); } }
+@keyframes ov-br-r { 0%, 100% { transform: none; } 50% { transform: translateX(1.6px); } }
 .ov-watch svg { width: 14px; height: 14px; }
 .ov-watch small { margin-left: -1px; }
 /* side by side with the film card the Film button would repeat it: it shows only once the card drops below the abstract */
