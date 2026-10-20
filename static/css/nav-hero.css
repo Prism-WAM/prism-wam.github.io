@@ -357,6 +357,7 @@ html.hero-tint body { background: #070a11; }
 .ov-links .ov-ic .ic-b { opacity: 0; transform: scale(.4) rotate(-30deg); }
 .ov-hf .ov-ic .ic-b { width: 128%; height: 128%; inset: -14%; }
 .ov-paper .cut { fill: #fff; } .ov-paper .cut-l { stroke: #fff; }
+.ov-hf .ic-l .hand { fill: var(--paper); } /* the hands sit in front of the face outline */
 .ov-links .ov-paper, .ov-links .ov-cite { --brand: var(--accent-ink); --tint: var(--accent-soft); --glow: rgba(106, 92, 192, .45); }
 .ov-links .ov-arxiv { --brand: #B31B1B; --tint: rgba(179, 27, 27, .06); --glow: rgba(179, 27, 27, .4); }
 .ov-links .ov-code { --brand: #1F2328; --tint: rgba(31, 35, 40, .05); --glow: rgba(31, 35, 40, .45); }
