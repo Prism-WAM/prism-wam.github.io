@@ -308,10 +308,11 @@
   .hero.no-anim, .hero.no-anim * { transition: none !important; }
   /* immersive first screen: until it folds, the hero runs on behind the browser's floating bottom bar (large viewport),
      while the film, the controls and the scroll cue stay centred / clear in the part that is always visible */
+  /* (+80px: newer iOS Safari shows page content even below its floating bar, past the large viewport) */
   @supports (height: 100lvh) {
-    .hero:not(.is-folded) { --hero-h: max(480px, 100lvh); padding-bottom: calc(64px + 100lvh - 100svh); }
+    .hero:not(.is-folded) { --hero-h: calc(max(480px, 100lvh) + 80px); padding-bottom: calc(64px + 100lvh - 100svh + 80px); }
     .hero:not(.is-folded) .hero-ctrl,
-    .hero:not(.is-folded) .hero-cue { bottom: calc(clamp(10px, 2.4vh, 22px) + 100lvh - 100svh); }
+    .hero:not(.is-folded) .hero-cue { bottom: calc(clamp(10px, 2.4vh, 22px) + 100lvh - 100svh + 80px); }
   }
 }
 /* newer iOS Safari tints its status bar from the page background (theme-color is ignored): while the hero holds the
@@ -527,7 +528,9 @@ html.hero-tint body { background: #070a11; }
   .ov-film { position: relative; top: auto; }
 }
 @media (max-width: 640px) {
-  .ov-title { font-size: 29px; line-height: 1.12; }
+  /* the folded hero already sits right above: no section gap on top of it (desktop keeps the full gap) */
+  #overview { padding-top: 28px; }
+  .ov-title { font-size: 25px; line-height: 1.14; }
   .ov-head { margin-bottom: 26px; }
   .ov-authors { margin-top: 12px; font-size: 15.5px; }
   .ov-affil { font-size: 13px; gap: 2px 12px; }
