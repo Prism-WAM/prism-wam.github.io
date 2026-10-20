@@ -306,7 +306,18 @@
   .hero-ctrl { transition: transform .9s var(--ease-io), right .9s var(--ease-io), bottom .9s var(--ease-io); transform-origin: 100% 100%; }
   .hero.is-folded .hero-ctrl { bottom: 6px; right: 8px; transform: scale(.78); }
   .hero.no-anim, .hero.no-anim * { transition: none !important; }
+  /* immersive first screen: until it folds, the hero runs on behind the browser's floating bottom bar (large viewport),
+     while the film, the controls and the scroll cue stay centred / clear in the part that is always visible */
+  @supports (height: 100lvh) {
+    .hero:not(.is-folded) { --hero-h: max(480px, 100lvh); padding-bottom: calc(64px + 100lvh - 100svh); }
+    .hero:not(.is-folded) .hero-ctrl,
+    .hero:not(.is-folded) .hero-cue { bottom: calc(clamp(10px, 2.4vh, 22px) + 100lvh - 100svh); }
+  }
 }
+/* newer iOS Safari tints its status bar from the page background (theme-color is ignored): while the hero holds the
+   top of a phone screen the page background is the hero's dark; the content itself keeps its paper background */
+main { background: var(--paper); }
+html.hero-tint body { background: #070a11; }
 
 /* ═════════ overview ═════════ */
 #overview { background: var(--paper); }

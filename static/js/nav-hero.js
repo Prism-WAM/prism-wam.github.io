@@ -341,6 +341,14 @@
     // own height so the paper title below comes into view. Only ever at the top; otherwise it waits for the return.
     const heroEl = $("#top");
     const mqFold = window.matchMedia("(max-aspect-ratio: 6/5) and (max-width: 899.98px)");
+    // status-bar tint (see .hero-tint in nav-hero.css): dark while the hero still covers the top of a phone screen
+    const syncTint = () => {
+      if (!heroEl) return;
+      document.documentElement.classList.toggle("hero-tint", mqFold.matches && heroEl.getBoundingClientRect().bottom > 80);
+    };
+    addEventListener("scroll", syncTint, { passive: true });
+    addEventListener("resize", syncTint);
+    syncTint();
     const fold = () => {
       if (!heroEl || heroEl.classList.contains("is-folded") || !mqFold.matches) return;
       if (!atTop()) { foldDue = true; return; }
